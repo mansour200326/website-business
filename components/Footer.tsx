@@ -16,7 +16,7 @@ export default function Footer() {
           {footer.meta.map((line) => (
             <span key={line}>{line}</span>
           ))}
-          <span>© 2026 · {name}</span>
+          <span>© {name}</span>
         </div>
       </div>
     </footer>
