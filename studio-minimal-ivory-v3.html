@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Independent Web Studio — Dubai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F4EF;
+  --surface:#EDEAE2;
+  --navy:#141416;
+  --navy-deep:#0E0E10;
+  --blue:#B8AF9E;
+  --muted:#6E6A61;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--navy);font-family:'Archivo',sans-serif;font-size:17px;line-height:1.7}
+::selection{background:var(--navy);color:var(--bg)}
+.mono{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+
+nav{position:sticky;top:0;z-index:50;background:rgba(246,244,239,.85);backdrop-filter:blur(12px)}
+.nav-in{max-width:1080px;margin:0 auto;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:600;font-size:17px;color:var(--navy);text-decoration:none;letter-spacing:-.01em}
+.logo span{color:var(--muted);font-weight:400;font-size:13px;margin-left:10px}
+nav .links{display:flex;gap:30px;align-items:center}
+nav .links a{color:var(--navy);text-decoration:none;font-size:15px;opacity:.75;transition:opacity .2s}
+nav .links a:hover{opacity:1}
+nav .links a.cta{background:var(--navy);color:var(--bg);padding:11px 22px;border-radius:100px;opacity:1;font-size:14px;transition:background .2s}
+nav .links a.cta:hover{background:#16345C}
+@media(max-width:680px){nav .links a:not(.cta){display:none}}
+
+header{padding:150px 0 130px}
+h1{font-weight:600;font-size:clamp(34px,4.5vw,60px);line-height:1.15;letter-spacing:-.02em;max-width:760px}
+.h-sub{margin-top:26px;max-width:520px;font-size:19px;color:var(--muted)}
+.h-ctas{margin-top:40px;display:flex;gap:26px;align-items:center}
+.btn{background:var(--navy);color:var(--bg);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s,transform .2s}
+.btn:hover{background:#16345C;transform:translateY(-1px)}
+.tlink{color:var(--navy);text-decoration:none;font-size:15px;border-bottom:1px solid var(--blue);padding-bottom:2px;transition:border-color .2s}
+.tlink:hover{border-color:var(--navy)}
+
+section{padding:140px 0}
+.sec-eyebrow{margin-bottom:18px}
+.sec-title{font-weight:600;font-size:clamp(26px,3vw,38px);letter-spacing:-.015em;margin-bottom:60px;max-width:640px}
+
+/* work */
+.work-list{display:grid;gap:90px}
+.workcard{display:grid;grid-template-columns:1.25fr 1fr;gap:50px;align-items:center}
+.workcard:nth-child(even){grid-template-columns:1fr 1.25fr}
+.workcard:nth-child(even) .shot{order:2}
+.shot{--hue:#C9943A;--hue2:#7D1F1F;aspect-ratio:16/10.5;border-radius:14px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--hue) 50%, #111113) 0%, #111113 55%, color-mix(in srgb, var(--hue2) 42%, #111113) 100%);
+  box-shadow:0 24px 60px -28px rgba(20,20,22,.4);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.workcard:hover .shot{transform:translateY(-5px)}
+.shot .fw{position:absolute;inset:0;display:grid;place-items:center;color:#F2EFE7;font-weight:600;font-size:clamp(20px,2.4vw,30px);letter-spacing:-.01em;text-align:center;padding:0 20px}
+.winfo h3{font-weight:600;font-size:26px;letter-spacing:-.015em;margin-bottom:6px}
+.winfo .meta{color:var(--muted);font-size:15px;margin-bottom:16px}
+.winfo p{color:#4C4A44;font-size:16px;max-width:420px}
+@media(max-width:760px){.workcard,.workcard:nth-child(even){grid-template-columns:1fr}.workcard:nth-child(even) .shot{order:0}}
+
+/* services */
+#services{background:var(--surface);border-radius:28px;margin:0 20px}
+#services .wrap{padding-top:0;padding-bottom:0}
+.svc-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:50px}
+.svc h3{font-weight:600;font-size:22px;letter-spacing:-.01em;margin-bottom:12px}
+.svc p{color:#4C4A44;font-size:16px;margin-bottom:20px}
+.svc a{color:var(--navy);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--blue);padding-bottom:2px;transition:border-color .2s}
+.svc a:hover{border-color:var(--navy)}
+
+/* process */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:50px}
+.step .d{margin-bottom:14px}
+.step h4{font-weight:600;font-size:18px;margin-bottom:8px}
+.step p{color:#4C4A44;font-size:15px}
+
+/* bilingual */
+.bi{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.bi .ar{direction:rtl;text-align:right}
+.bi h3{font-weight:600;font-size:24px;margin-bottom:10px;letter-spacing:-.01em}
+.bi p{color:#4C4A44;font-size:16px}
+@media(max-width:680px){.bi{grid-template-columns:1fr;gap:40px}}
+
+/* footer */
+footer{background:var(--navy-deep);color:var(--bg);border-radius:28px 28px 0 0;margin:0 20px;padding:110px 0 50px}
+.f-title{font-weight:600;font-size:clamp(30px,4vw,52px);letter-spacing:-.02em;margin-bottom:18px;color:#F6F4EF}
+.f-sub{color:#A5A199;font-size:17px;margin-bottom:40px;max-width:440px}
+.f-meta{margin-top:90px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#8A867D;font-size:13px}
+
+.rv{opacity:0;transform:translateY(12px)}
+.rv.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1!important;transform:none!important}
+  html{scroll-behavior:auto}
+}
+
+/* --- structure lines --- */
+.hairline{border-top:1px solid rgba(20,20,22,.16)}
+section .wrap{position:relative}
+.sec-head-row{display:flex;align-items:center;gap:18px;border-top:1px solid rgba(20,20,22,.2);padding-top:22px;margin-bottom:18px}
+.sec-head-row .mono{margin-bottom:0}
+.sec-head-row .idx{margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted)}
+.workcard{border-top:1px solid rgba(20,20,22,.14);padding-top:44px;position:relative}
+.workcard .wno{position:absolute;top:44px;right:0;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted)}
+.winfo h3{padding-bottom:14px;border-bottom:1px solid rgba(20,20,22,.14);margin-bottom:14px}
+.svc{border-top:1px solid rgba(20,20,22,.2);padding-top:26px}
+.svc-list{gap:40px}
+.steps{border-top:1px solid rgba(20,20,22,.2)}
+.step{padding-top:26px;border-left:1px solid rgba(20,20,22,.12);padding-left:22px}
+.step:first-child{border-left:none;padding-left:0}
+@media(max-width:760px){.step{border-left:none;padding-left:0;border-top:1px solid rgba(20,20,22,.1)}}
+.bi{border-top:1px solid rgba(20,20,22,.2);padding-top:50px}
+.h-ctas{border-top:1px solid rgba(20,20,22,.14);padding-top:34px;margin-top:34px}
+nav{border-bottom:1px solid rgba(20,20,22,.14)}
+.f-meta{border-top:1px solid rgba(122,160,210,.25);padding-top:26px}
+
+:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#">M<span>· name in production</span></a>
+    <div class="links">
+      <a href="#work">Work</a>
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a class="cta" href="#contact">Get a quote</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <h1 class="rv">Sites that ship in days — and look like they took months.</h1>
+    <p class="h-sub rv">Custom design, real animation, and native Arabic — one independent studio in Dubai, no agency overhead.</p>
+    <div class="h-ctas rv">
+      <a class="btn" href="#contact">Get a quote on WhatsApp</a>
+      <a class="tlink" href="#work">See the work</a>
+    </div>
+  </div>
+</header>
+
+<section id="work" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head-row rv"><span class="mono">Selected work</span><span class="idx">01</span></div>
+    <h2 class="sec-title rv">Three brands, three worlds — one studio.</h2>
+    <div class="work-list">
+
+      <div class="workcard rv">
+        <span class="wno">W·01</span><div class="shot" style="--hue:#C9943A;--hue2:#7D1F1F"><span class="fw">Grailhaus</span></div>
+        <div class="winfo">
+          <h3>Grailhaus</h3>
+          <div class="meta">Sports collectibles · online store</div>
+          <p>A one-of-one trading card shop with an animated identity, custom storefront, and an archive that takes offers, not orders.</p>
+        </div>
+      </div>
+
+      <div class="workcard rv">
+        <span class="wno">W·02</span><div class="shot" style="--hue:#D8CFC0;--hue2:#1A2436"><span class="fw">Sumou Jet</span></div>
+        <div class="winfo">
+          <h3>Sumou Jet</h3>
+          <div class="meta">Private aviation · brand site</div>
+          <p>Cinematic charter website for Gulf clientele — hero film, custom booking flow, and a native Arabic edition throughout.</p>
+        </div>
+      </div>
+
+      <div class="workcard rv">
+        <span class="wno">W·03</span><div class="shot" style="--hue:#1F4A38;--hue2:#8B5A2B"><span class="fw">Maison Padel</span></div>
+        <div class="winfo">
+          <h3>Maison Padel</h3>
+          <div class="meta">Members' club · brand & booking</div>
+          <p>Dubai's first luxury indoor padel club — brand system, bilingual booking experience, and interactive floor plan, built ahead of opening.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap" style="padding-top:110px;padding-bottom:110px">
+    <div class="sec-head-row rv"><span class="mono">Services</span><span class="idx">02</span></div>
+    <h2 class="sec-title rv">Whatever you're building, it deserves better than a template.</h2>
+    <div class="svc-list">
+      <div class="svc rv">
+        <h3>Websites</h3>
+        <p>Custom-designed brand sites — built in days, made to make you look established from the first click.</p>
+        <a href="#contact">Get a quote →</a>
+      </div>
+      <div class="svc rv">
+        <h3>Online stores</h3>
+        <p>E-commerce that's ready to sell — payments, products, and a storefront your customers actually enjoy.</p>
+        <a href="#contact">Get a quote →</a>
+      </div>
+      <div class="svc rv">
+        <h3>Signature builds</h3>
+        <p>The full treatment — brand-level art direction, custom animation, and a site nobody scrolls past.</p>
+        <a href="#contact">Get a quote →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="sec-head-row rv"><span class="mono">Process</span><span class="idx">03</span></div>
+    <h2 class="sec-title rv">Measured in days, not months.</h2>
+    <div class="steps">
+      <div class="step rv"><div class="d mono">Day 0</div><h4>Brief</h4><p>One call or one voice note — I take it from there.</p></div>
+      <div class="step rv"><div class="d mono">Day 1</div><h4>Draft</h4><p>A working design in your hands, with real motion.</p></div>
+      <div class="step rv"><div class="d mono">Days 2–4</div><h4>Build</h4><p>The full site, previewed live as it grows.</p></div>
+      <div class="step rv"><div class="d mono">Day 5</div><h4>Ship</h4><p>Your domain, your accounts, your keys.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="bilingual" style="padding-top:0">
+  <div class="wrap">
+    <div class="bi rv">
+      <div class="rv">
+        <h3>Your site, in English.</h3>
+        <p>Structured and written for the reader — and every build ships ready for its Arabic mirror.</p>
+      </div>
+      <div class="ar rv">
+        <h3>موقعك، بالعربية.</h3>
+        <p>نسخة عربية أصلية — اتجاه صحيح، خط مدروس، ونصوص مكتوبة للقارئ العربي.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="f-title rv">Let's build yours.</div>
+    <p class="f-sub rv">Tell me what you do — I'll tell you what your website should do. Quotes over WhatsApp, usually within hours.</p>
+    <a class="btn rv" style="background:var(--blue);color:#141416" href="#">Message on WhatsApp</a>
+    <div class="f-meta">
+      <span>Dubai, UAE — ships worldwide</span>
+      <span>English / العربية</span>
+      <span>© 2026 · name in production</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
