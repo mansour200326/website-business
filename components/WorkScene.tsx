@@ -1,11 +1,15 @@
+import Image from "next/image";
 import type { Scene } from "@/config/site";
+import type { WorkShots } from "@/lib/workShots";
 
 export default function WorkScene({
   scene,
   flip,
+  shots,
 }: {
   scene: Scene;
   flip: boolean;
+  shots: WorkShots;
 }) {
   return (
     <article
@@ -26,9 +30,41 @@ export default function WorkScene({
           ))}
         </div>
       </div>
-      <div className="frame">
-        <span className="fword">{scene.frame}</span>
-      </div>
+
+      {shots.hasDesktop ? (
+        <div className="display">
+          <div className="browser">
+            <div className="bar" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
+            <div className="shot">
+              <Image
+                src={shots.desktopSrc}
+                alt={`${scene.title} — desktop site`}
+                fill
+                sizes="(max-width: 820px) 90vw, 45vw"
+              />
+            </div>
+          </div>
+          {shots.hasMobile && (
+            <div className="phone">
+              <Image
+                src={shots.mobileSrc}
+                alt={`${scene.title} — mobile site`}
+                fill
+                sizes="(max-width: 820px) 26vw, 13vw"
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="frame">
+          <span className="fword">{scene.frame}</span>
+        </div>
+      )}
+
       <span className="no">{scene.prj}</span>
     </article>
   );
