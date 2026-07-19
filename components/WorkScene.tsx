@@ -19,8 +19,9 @@ export default function WorkScene({
       }
     >
       <div>
+        <span className="no">{scene.prj}</span>
         <h3>{scene.title}</h3>
-        <div className="meta mono">{scene.sector}</div>
+        <div className="meta">{scene.sector}</div>
         <p>{scene.description}</p>
         <div className="tags">
           {scene.tags.map((tag) => (
@@ -44,7 +45,7 @@ export default function WorkScene({
                 src={shots.desktopSrc}
                 alt={`${scene.title} — desktop site`}
                 fill
-                sizes="(max-width: 820px) 90vw, 45vw"
+                sizes="(max-width: 820px) 90vw, 55vw"
               />
             </div>
           </div>
@@ -54,7 +55,7 @@ export default function WorkScene({
                 src={shots.mobileSrc}
                 alt={`${scene.title} — mobile site`}
                 fill
-                sizes="(max-width: 820px) 26vw, 13vw"
+                sizes="(max-width: 820px) 26vw, 15vw"
               />
             </div>
           )}
@@ -64,8 +65,6 @@ export default function WorkScene({
           <span className="fword">{scene.frame}</span>
         </div>
       )}
-
-      <span className="no">{scene.prj}</span>
     </article>
   );
 }

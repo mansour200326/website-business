@@ -49,6 +49,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Without JS the scroll-reveal elements would stay hidden — show them. */}
+        <noscript>
+          <style>{`.rv{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
+      </head>
       <body className={`${archivo.variable} ${spaceMono.variable}`}>
         {children}
       </body>

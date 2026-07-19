@@ -1,13 +1,12 @@
 import { Archivo, Space_Mono } from "next/font/google";
 
 /**
- * Archivo — variable font. We load the full weight range plus the `wdth`
- * (width) axis so `font-stretch:125%` in the ported CSS resolves to the
- * expanded weights the prototype uses.
+ * Archivo — variable font at normal width. Used for headings and body at
+ * weights 500–600 (sentence case). The width axis is intentionally not loaded;
+ * the design uses normal-width Archivo only.
  */
 export const archivo = Archivo({
   subsets: ["latin"],
-  axes: ["wdth"],
   display: "swap",
   variable: "--font-archivo",
 });
