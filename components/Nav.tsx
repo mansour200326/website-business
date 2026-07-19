@@ -14,10 +14,10 @@ export default function Nav() {
       </a>
       <div className="links">
         <a href="#work">Work</a>
-        <a href="#plans">Pricing</a>
+        <a href="#services">Services</a>
         <a href="#process">Process</a>
         <a className="go" href="#contact">
-          Start →
+          Start
         </a>
       </div>
     </nav>

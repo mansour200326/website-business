@@ -1,8 +1,7 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import Reel from "@/components/Reel";
 import Work from "@/components/Work";
-import Plans from "@/components/Plans";
+import Services from "@/components/Services";
 import Process from "@/components/Process";
 import Bilingual from "@/components/Bilingual";
 import Footer from "@/components/Footer";
@@ -13,9 +12,8 @@ export default function Home() {
     <>
       <Nav />
       <Hero />
-      <Reel />
       <Work />
-      <Plans />
+      <Services />
       <Process />
       <Bilingual />
       <Footer />

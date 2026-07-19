@@ -57,10 +57,12 @@ point at the placeholder and won't open a real chat.
 
 ### Everything else
 
-`config/site.ts` also holds prices & package details, project scenes
-(`title`, `sector`, `description`, `tags`, `hue`, `hue2`, `frame`, `prj`), the
-reel words, process steps, the bilingual panel, footer meta, and SEO metadata.
-Each field is documented inline in that file.
+`config/site.ts` also holds the services (`name`, `subject`, `description` —
+plain language, no prices), project scenes (`slug`, `title`, `sector`,
+`description`, `tags`, `hue`, `hue2`, `frame`, `prj`), process steps, the
+bilingual panel, footer meta, and SEO metadata. Each field is documented
+inline in that file. Every "Get a quote" link builds a wa.me message naming the
+service.
 
 ## Project structure
 
@@ -68,25 +70,28 @@ Each field is documented inline in that file.
 app/
   layout.tsx        # metadata, OpenGraph, theme-color, next/font wiring
   page.tsx          # composes the single-page site
-  globals.css       # the prototype's CSS, ported verbatim
-  fonts.ts          # Archivo (expanded) + Space Mono via next/font
-components/          # Nav, Hero, Reel, WorkScene, Work, Plans, Process,
+  globals.css       # global stylesheet (modern-minimal, two-tone)
+  fonts.ts          # Archivo (normal width) + Space Mono via next/font
+components/          # Nav, Hero, Work, WorkScene, Services, Process,
                      # Bilingual, Footer, Reveals
 config/site.ts      # ← single source of truth
 lib/whatsapp.ts     # builds wa.me links from the config
+lib/workShots.ts    # resolves /public/work screenshots (.png then .jpeg)
 public/og.png       # 1200×630 OpenGraph image (static asset)
+public/work/        # project screenshots (see public/work/README.md)
 scripts/og.html     # source used to render public/og.png
 ```
 
 ## Fonts, performance & accessibility
 
-- Fonts load through `next/font/google` (Archivo with the `wdth` axis for the
-  expanded weights, plus Space Mono) — self-hosted, no layout shift.
-- The opening counter and hero sequence use reserved space (absolute counter,
-  `overflow:hidden` headline rows) so there is no CLS.
-- Animations are CSS-first; the page is statically prerendered.
-- `prefers-reduced-motion` is respected end-to-end: the counter is skipped and
-  all content is visible instantly.
+- Fonts load through `next/font/google` (Archivo at normal width, plus Space
+  Mono for tiny labels) — self-hosted, no layout shift.
+- Work screenshots use `next/image` with aspect-ratio containers, so images
+  reserve space and there is no CLS.
+- Motion is CSS-first and minimal: gentle fade-and-rise scroll reveals and a
+  slow hover pan on the work screenshots; the page is statically prerendered.
+- `prefers-reduced-motion` is respected end-to-end: reveals show instantly and
+  the screenshot pan is disabled.
 - Responsive down to 375px with no horizontal scroll; the reel and work scenes
   are contained on mobile.
 
