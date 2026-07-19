@@ -88,12 +88,12 @@ export const site = {
 
   /** RULED SECTION HEADERS */
   sections: {
-    work: { eyebrow: "Selected work", idx: "01", title: "Three brands, three worlds — one studio." },
+    work: { eyebrow: "Selected work", idx: "01", title: "Work that makes people ask who built it." },
     services: { eyebrow: "Services", idx: "02", title: "Whatever you're building, it deserves better than a template." },
     process: { eyebrow: "Process", idx: "03", title: "Measured in days, not months." },
   } as Record<"work" | "services" | "process", SectionHead>,
 
-  /** WORK — three alternating cards; screenshots fill the cards when present */
+  /** WORK — alternating cards; screenshots fill the cards when present */
   scenes: [
     {
       slug: "grailhaus",
@@ -121,7 +121,7 @@ export const site = {
       title: "Maison Padel",
       meta: "Members' club · brand & booking",
       description:
-        "Dubai's first luxury indoor padel club — brand system, bilingual booking experience, and interactive floor plan, built ahead of opening.",
+        "Dubai's first luxury indoor padel club — brand system, bilingual booking experience, and an interactive floor plan.",
       hue: "#1F4A38",
       hue2: "#8B5A2B",
     },
