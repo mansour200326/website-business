@@ -11,6 +11,8 @@
  */
 
 export interface Scene {
+  /** url-safe id used to locate screenshots in /public/work (`${slug}-desktop.png` / `${slug}-mobile.png`) */
+  slug: string;
   /** project title */
   title: string;
   /** sector / category line */
@@ -118,6 +120,7 @@ export const site = {
   /** WORK SCENES */
   scenes: [
     {
+      slug: "grailhaus",
       title: "Grailhaus",
       sector: "Sports collectibles · e-commerce",
       description:
@@ -129,6 +132,7 @@ export const site = {
       prj: "PRJ 003",
     },
     {
+      slug: "sumoujet",
       title: "Sumou Jet",
       sector: "Private aviation · luxury brand",
       description:
@@ -140,6 +144,7 @@ export const site = {
       prj: "PRJ 002",
     },
     {
+      slug: "maisonpadel",
       title: "Maison Padel",
       sector: "Members' club · hospitality & sport",
       description:

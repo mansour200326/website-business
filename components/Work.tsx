@@ -1,4 +1,5 @@
 import { site } from "@/config/site";
+import { workShots } from "@/lib/workShots";
 import WorkScene from "./WorkScene";
 
 export default function Work() {
@@ -6,7 +7,12 @@ export default function Work() {
     <section id="work">
       <div className="sec-label mono">{site.labels.work}</div>
       {site.scenes.map((scene, i) => (
-        <WorkScene key={scene.prj} scene={scene} flip={i % 2 === 1} />
+        <WorkScene
+          key={scene.prj}
+          scene={scene}
+          flip={i % 2 === 1}
+          shots={workShots(scene.slug)}
+        />
       ))}
     </section>
   );

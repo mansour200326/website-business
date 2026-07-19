@@ -87,9 +87,50 @@ h1 .thin{font-weight:700;color:transparent;-webkit-text-stroke:1.5px var(--white
 .scene .frame::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.18) 3px 4px);opacity:.5}
 .scene .frame .fword{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-archivo),sans-serif;font-stretch:125%;font-weight:800;text-transform:uppercase;font-size:clamp(26px,3.4vw,44px);color:#AFD6F8;text-shadow:0 6px 30px rgba(0,0,0,.55);letter-spacing:.02em;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
 .scene:hover .frame .fword{transform:scale(1.06)}
+
+/* ---------- WORK SCENE DISPLAY (real screenshots) ---------- */
+/* Brand-color glow backdrop; the browser frame "sits on" it. */
+.scene .display{
+  position:relative;overflow:hidden;
+  border:1px solid var(--line);
+  padding:clamp(16px,4.5%,40px);
+  background:
+    radial-gradient(130% 120% at 12% 0%, color-mix(in srgb, var(--hue) 55%, transparent) 0%, transparent 58%),
+    radial-gradient(130% 120% at 100% 100%, color-mix(in srgb, var(--hue2) 55%, transparent) 0%, transparent 58%),
+    linear-gradient(135deg, color-mix(in srgb, var(--hue) 26%, #0B1526) 0%, #0B1526 55%, color-mix(in srgb, var(--hue2) 26%, #0B1526) 100%);
+}
+.scene .browser{
+  position:relative;width:100%;border-radius:10px;overflow:hidden;
+  border:1px solid rgba(169,210,247,.18);
+  box-shadow:0 26px 55px rgba(0,0,0,.5);background:#0B1526;
+}
+.scene .browser .bar{
+  display:flex;align-items:center;gap:7px;height:26px;padding:0 13px;
+  background:#0D1A30;border-bottom:1px solid rgba(169,210,247,.14);
+}
+.scene .browser .bar i{width:8px;height:8px;border-radius:50%;background:#2E5586;display:block}
+.scene .browser .shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0B1526}
+.scene .browser .shot img{object-fit:cover;object-position:50% 0%}
+/* Floating phone, overlapping the desktop frame's bottom-right corner. */
+.scene .phone{
+  position:absolute;right:clamp(6px,2.4%,22px);bottom:clamp(6px,2.4%,22px);
+  width:28%;aspect-ratio:9/19;
+  border-radius:16px;border:3px solid #0A1526;overflow:hidden;
+  background:#0B1526;box-shadow:0 16px 30px rgba(0,0,0,.55);
+}
+.scene .phone img{object-fit:cover;object-position:50% 0%}
+
+/* Hover motion — only where motion is welcome. */
+@media (prefers-reduced-motion: no-preference){
+  .scene .browser .shot img{transition:object-position 6s ease}
+  .scene:hover .browser .shot img{object-position:50% 100%}
+  .scene .phone{transition:transform .35s ease}
+  .scene:hover .phone{transform:translateY(-6px)}
+}
+
 .scene.flip{grid-template-columns:1fr 1fr}
-.scene.flip .frame{order:-1}
-@media(max-width:820px){.scene,.scene.flip{grid-template-columns:1fr}.scene.flip .frame{order:0}}
+.scene.flip .frame,.scene.flip .display{order:-1}
+@media(max-width:820px){.scene,.scene.flip{grid-template-columns:1fr}.scene.flip .frame,.scene.flip .display{order:0}}
 
 /* ---------- PRICING ---------- */
 #plans{padding:110px 34px}
