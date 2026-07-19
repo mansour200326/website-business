@@ -3,19 +3,20 @@ import { waLink } from "@/lib/whatsapp";
 
 export default function Footer() {
   const name = site.studioName || NAME_PLACEHOLDER;
+  const { footer } = site;
   return (
     <footer id="contact">
       <div className="wrap">
-        <div className="f-big rv">
-          <a href={waLink()} target="_blank" rel="noopener noreferrer">
-            {site.footer.big}
-          </a>
-        </div>
+        <div className="f-title rv">{footer.title}</div>
+        <p className="f-sub rv">{footer.sub}</p>
+        <a className="btn-wa rv" href={waLink()} target="_blank" rel="noopener noreferrer">
+          {footer.button}
+        </a>
         <div className="f-meta">
-          {site.footer.meta.map((line) => (
+          {footer.meta.map((line) => (
             <span key={line}>{line}</span>
           ))}
-          <span>© 2026 — {name}</span>
+          <span>© 2026 · {name}</span>
         </div>
       </div>
     </footer>

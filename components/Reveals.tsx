@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Scroll reveals — ports the prototype's IntersectionObserver that adds the
+ * Scroll reveals — ports the design file's IntersectionObserver that adds the
  * `in` class to every `.rv` element as it enters the viewport. Mounted once.
  */
 export default function Reveals() {
@@ -25,7 +25,7 @@ export default function Reveals() {
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.15 }
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();

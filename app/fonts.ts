@@ -11,10 +11,10 @@ export const archivo = Archivo({
   variable: "--font-archivo",
 });
 
-/** Space Mono — used for all mono / label typography. */
+/** Space Mono — reserved for tiny labels and index numbers (weight 400 only). */
 export const spaceMono = Space_Mono({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400"],
   display: "swap",
   variable: "--font-space-mono",
 });

@@ -11,24 +11,20 @@
  */
 
 export interface Scene {
-  /** url-safe id used to locate screenshots in /public/work (`${slug}-desktop.(png|jpeg)` etc.) */
+  /** url-safe id used to locate the screenshot in /public/work (`${slug}-desktop.(png|jpeg)`) */
   slug: string;
-  /** project title */
+  /** work index label, e.g. "W·01" */
+  wno: string;
+  /** project title (also the wordmark shown in the gradient fallback) */
   title: string;
   /** sector / category line */
-  sector: string;
+  meta: string;
   /** short description paragraph */
   description: string;
-  /** capability tags (rendered as plain text, no boxes) */
-  tags: string[];
-  /** primary brand-glow hue behind the screenshot display */
+  /** primary gradient hue for the fallback treatment */
   hue: string;
-  /** secondary brand-glow hue */
+  /** secondary gradient hue for the fallback treatment */
   hue2: string;
-  /** word shown inside the gradient fallback frame (only when no screenshot exists) */
-  frame: string;
-  /** project index label, e.g. "03" */
-  prj: string;
 }
 
 export interface Service {
@@ -41,12 +37,21 @@ export interface Service {
 }
 
 export interface ProcessStep {
-  /** day marker, e.g. "D0" or "D2–4" */
+  /** day marker, e.g. "Day 0" or "Days 2–4" */
   day: string;
   /** step title */
   title: string;
   /** step description */
   text: string;
+}
+
+export interface SectionHead {
+  /** small mono eyebrow label */
+  eyebrow: string;
+  /** index shown at the right of the ruled header row */
+  idx: string;
+  /** section title */
+  title: string;
 }
 
 export const site = {
@@ -67,67 +72,58 @@ export const site = {
     /** swapped to studioName when set */
     title: "Independent Web Studio — Dubai",
     description:
-      "Design, build, animation, and native Arabic — one studio, no agency overhead, no templates, no six-week timelines.",
+      "Custom design, real animation, and native Arabic — one independent studio in Dubai, no agency overhead.",
     /** absolute base URL of the deployed site, used for OG tags */
     url: "https://independent-web-studio.example",
-    themeColor: "#E9F2FB",
+    themeColor: "#F6F4EF",
   },
 
   /** HERO */
   hero: {
-    eyebrow: "Independent web studio — Dubai",
-    /** headline lines, rendered sentence case with generous line-height */
-    headline: ["Sites that ship in days —", "and look like they took months."],
-    sub: "Design, build, animation, and native Arabic — one studio, no agency overhead, no templates, no six-week timelines.",
+    headline: "Sites that ship in days — and look like they took months.",
+    sub: "Custom design, real animation, and native Arabic — one independent studio in Dubai, no agency overhead.",
     ctaPrimary: "Get a quote on WhatsApp",
     ctaSecondary: "See the work",
   },
 
-  /** SECTION LABELS (small mono eyebrows, used sparingly) */
-  labels: {
-    work: "Selected work",
-    services: "What we make",
-    process: "How it works",
-    bilingual: "Two languages, one build",
-  },
+  /** RULED SECTION HEADERS */
+  sections: {
+    work: { eyebrow: "Selected work", idx: "01", title: "Three brands, three worlds — one studio." },
+    services: { eyebrow: "Services", idx: "02", title: "Whatever you're building, it deserves better than a template." },
+    process: { eyebrow: "Process", idx: "03", title: "Measured in days, not months." },
+  } as Record<"work" | "services" | "process", SectionHead>,
 
-  /** WORK SCENES — the visual heroes of the site */
+  /** WORK — three alternating cards; screenshots fill the cards when present */
   scenes: [
     {
       slug: "grailhaus",
+      wno: "W·01",
       title: "Grailhaus",
-      sector: "Sports collectibles · e-commerce",
+      meta: "Sports collectibles · online store",
       description:
-        "A one-of-one card shop with a title-sequence hero, holo-shine product hovers, and an archive that takes offers, not orders.",
-      tags: ["Shopify", "Custom theme", "Animation"],
+        "A one-of-one trading card shop with an animated identity, custom storefront, and an archive that takes offers, not orders.",
       hue: "#C9943A",
       hue2: "#7D1F1F",
-      frame: "The Locker Room Archive",
-      prj: "03",
     },
     {
       slug: "sumoujet",
+      wno: "W·02",
       title: "Sumou Jet",
-      sector: "Private aviation · luxury brand",
+      meta: "Private aviation · brand site",
       description:
-        "Cinematic charter site for Gulf royalty and HNWIs — hero film, custom booking bar, and a server-rendered Arabic mirror written by native hands.",
-      tags: ["Next.js", "EN / AR", "Brand system"],
+        "Cinematic charter website for Gulf clientele — hero film, custom booking flow, and a native Arabic edition throughout.",
       hue: "#D8CFC0",
       hue2: "#1A2436",
-      frame: "نفتخر بخدمة سموكم",
-      prj: "02",
     },
     {
       slug: "maisonpadel",
+      wno: "W·03",
       title: "Maison Padel",
-      sector: "Members' club · hospitality & sport",
+      meta: "Members' club · brand & booking",
       description:
-        "Dubai's first luxury indoor padel members' club — brand system, bilingual booking experience, and an interactive floor plan, built ahead of opening.",
-      tags: ["Brand system", "Booking app", "EN / AR"],
+        "Dubai's first luxury indoor padel club — brand system, bilingual booking experience, and interactive floor plan, built ahead of opening.",
       hue: "#1F4A38",
       hue2: "#8B5A2B",
-      frame: "Le Court Privé",
-      prj: "01",
     },
   ] as Scene[],
 
@@ -137,51 +133,49 @@ export const site = {
       name: "Websites",
       subject: "a website",
       description:
-        "Custom-designed brand sites, built in days. Fast, refined, and unmistakably yours — never a template.",
+        "Custom-designed brand sites — built in days, made to make you look established from the first click.",
     },
     {
       name: "Online stores",
       subject: "an online store",
       description:
-        "E-commerce that's ready to sell. Products, payments, and checkout set up properly from the first day.",
+        "E-commerce that's ready to sell — payments, products, and a storefront your customers actually enjoy.",
     },
     {
       name: "Signature builds",
       subject: "a signature build",
       description:
-        "Full brand-level design and animation. A considered, cinematic site that makes your brand lead its category.",
+        "The full treatment — brand-level art direction, custom animation, and a site nobody scrolls past.",
     },
   ] as Service[],
 
-  /** PROCESS — measured in days */
+  /** PROCESS — Day 0 → Day 5 */
   process: [
-    { day: "D0", title: "Brief", text: "One call or one voice note. I extract what your brand actually needs." },
-    { day: "D1", title: "Draft", text: "A working prototype in your hands — real motion, not a static mockup." },
-    { day: "D2–4", title: "Build", text: "The full site, previewed live as it grows. Two revision rounds included." },
-    { day: "D5", title: "Ship", text: "Your domain, your accounts, your keys. You own everything — no dependency." },
+    { day: "Day 0", title: "Brief", text: "One call or one voice note — I take it from there." },
+    { day: "Day 1", title: "Draft", text: "A working design in your hands, with real motion." },
+    { day: "Days 2–4", title: "Build", text: "The full site, previewed live as it grows." },
+    { day: "Day 5", title: "Ship", text: "Your domain, your accounts, your keys." },
   ] as ProcessStep[],
 
-  /** BILINGUAL panel */
+  /** BILINGUAL split */
   bilingual: {
     en: {
       heading: "Your site, in English.",
-      body: "Structured, typeset, and written for the reader — not translated at them. Every build ships ready for its Arabic mirror.",
+      body: "Structured and written for the reader — and every build ships ready for its Arabic mirror.",
     },
     ar: {
       heading: "موقعك، بالعربية.",
-      body: "نسخة عربية أصلية — اتجاه صحيح، خط مدروس، ونصوص مكتوبة للقارئ العربي. ليست ترجمة مركّبة على تصميم إنجليزي.",
+      body: "نسخة عربية أصلية — اتجاه صحيح، خط مدروس، ونصوص مكتوبة للقارئ العربي.",
     },
   },
 
   /** FOOTER */
   footer: {
-    big: "Let's build →",
+    title: "Let's build yours.",
+    sub: "Tell me what you do — I'll tell you what your website should do. Quotes over WhatsApp, usually within hours.",
+    button: "Message on WhatsApp",
     /** meta line strings; the copyright line is generated from studioName */
-    meta: [
-      "Dubai, UAE — ships worldwide",
-      "WhatsApp — replies within hours",
-      "EN / العربية",
-    ],
+    meta: ["Dubai, UAE — ships worldwide", "English / العربية"],
   },
 };
 
@@ -190,7 +184,7 @@ export type Site = typeof site;
 /** Placeholder shown wherever the studio name isn't set yet. */
 export const NAME_PLACEHOLDER = "name in production";
 
-/** Nav/footer initial letter for the monogram. */
+/** Nav monogram / logo initial. */
 export function monogram(studioName: string): string {
   return studioName ? studioName.trim().charAt(0).toUpperCase() : "M";
 }

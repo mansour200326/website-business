@@ -6,20 +6,13 @@ export default function Hero() {
   return (
     <header id="top">
       <div className="wrap">
-        <div className="h-eyebrow mono">{hero.eyebrow}</div>
-        <h1>
-          {hero.headline.map((line, i) => (
-            <span className="row" key={i}>
-              {line}
-            </span>
-          ))}
-        </h1>
-        <p className="h-sub">{hero.sub}</p>
-        <div className="h-ctas">
+        <h1 className="rv">{hero.headline}</h1>
+        <p className="h-sub rv">{hero.sub}</p>
+        <div className="h-ctas rv">
           <a className="btn" href={waLink()} target="_blank" rel="noopener noreferrer">
             {hero.ctaPrimary}
           </a>
-          <a className="link" href="#work">
+          <a className="tlink" href="#work">
             {hero.ctaSecondary}
           </a>
         </div>
