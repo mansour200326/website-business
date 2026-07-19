@@ -1,70 +1,39 @@
 import Image from "next/image";
 import type { Scene } from "@/config/site";
-import type { WorkShots } from "@/lib/workShots";
+import type { WorkShot } from "@/lib/workShots";
 
 export default function WorkScene({
   scene,
-  flip,
-  shots,
+  shot,
 }: {
   scene: Scene;
-  flip: boolean;
-  shots: WorkShots;
+  shot: WorkShot;
 }) {
   return (
-    <article
-      className={`scene${flip ? " flip" : ""} rv`}
-      style={
-        { ["--hue" as string]: scene.hue, ["--hue2" as string]: scene.hue2 } as React.CSSProperties
-      }
-    >
-      <div>
-        <span className="no">{scene.prj}</span>
-        <h3>{scene.title}</h3>
-        <div className="meta">{scene.sector}</div>
-        <p>{scene.description}</p>
-        <div className="tags">
-          {scene.tags.map((tag) => (
-            <span className="tag" key={tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
+    <div className="workcard rv">
+      <span className="wno">{scene.wno}</span>
+      <div
+        className="shot"
+        style={
+          { ["--hue" as string]: scene.hue, ["--hue2" as string]: scene.hue2 } as React.CSSProperties
+        }
+      >
+        {shot.has ? (
+          <Image
+            src={shot.src}
+            alt={`${scene.title} — website`}
+            fill
+            sizes="(max-width: 760px) 90vw, 55vw"
+          />
+        ) : (
+          <span className="fw">{scene.title}</span>
+        )}
       </div>
-
-      {shots.hasDesktop ? (
-        <div className="display">
-          <div className="browser">
-            <div className="bar" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
-            <div className="shot">
-              <Image
-                src={shots.desktopSrc}
-                alt={`${scene.title} — desktop site`}
-                fill
-                sizes="(max-width: 820px) 90vw, 55vw"
-              />
-            </div>
-          </div>
-          {shots.hasMobile && (
-            <div className="phone">
-              <Image
-                src={shots.mobileSrc}
-                alt={`${scene.title} — mobile site`}
-                fill
-                sizes="(max-width: 820px) 26vw, 15vw"
-              />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="frame">
-          <span className="fword">{scene.frame}</span>
-        </div>
-      )}
-    </article>
+      <div className="winfo">
+        <h3>{scene.title}</h3>
+        <div className="meta">{scene.meta}</div>
+        <p>{scene.description}</p>
+      </div>
+    </div>
   );
 }

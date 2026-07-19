@@ -2,10 +2,10 @@
 
 A single-page portfolio/services site for an independent web design studio in
 Dubai. Built with **Next.js 14 (App Router) + TypeScript**, porting the approved
-design in `studio-prototype-v8-twotone.html` **verbatim** — same navy/baby-blue
-two-tone palette, Archivo (expanded) + Space Mono type, copy, layout, and every
-animation (opening 00→100 counter, blur-rise headline, reel marquee, scroll
-reveals, scene hover color-bleeds, button fills, footer hollow-stroke hover).
+design in `studio-minimal-ivory-v3.html` — a modern-minimal, ivory / ink /
+beige layout: Archivo (normal width, sentence case) + Space Mono for tiny
+labels, a hairline structure system, real screenshots inside rounded work
+cards, and restrained motion (fade-rise reveals + a slow screenshot hover pan).
 
 ## Getting started
 
@@ -49,20 +49,20 @@ export const site = {
 };
 ```
 
-Every CTA ("Start a project", each "Request …" plan button, and the footer
-"Let's build →") builds a [`wa.me`](https://wa.me) link from this number with a
-pre-filled message — the plan buttons include the package name. Use full
-international format, e.g. `+971501234567`. Until a real number is set the links
-point at the placeholder and won't open a real chat.
+Every CTA (the hero "Get a quote on WhatsApp", each service "Get a quote →"
+link, and the footer "Message on WhatsApp" button) builds a
+[`wa.me`](https://wa.me) link from this number with a pre-filled message — the
+service links name the service. Use full international format, e.g.
+`+971501234567`. Until a real number is set the links point at the placeholder
+and won't open a real chat.
 
 ### Everything else
 
 `config/site.ts` also holds the services (`name`, `subject`, `description` —
-plain language, no prices), project scenes (`slug`, `title`, `sector`,
-`description`, `tags`, `hue`, `hue2`, `frame`, `prj`), process steps, the
-bilingual panel, footer meta, and SEO metadata. Each field is documented
-inline in that file. Every "Get a quote" link builds a wa.me message naming the
-service.
+plain language, no prices), work scenes (`slug`, `wno`, `title`, `meta`,
+`description`, `hue`, `hue2`), the ruled section headers, process steps, the
+bilingual panel, footer, and SEO metadata. Each field is documented inline in
+that file.
 
 ## Project structure
 
@@ -70,13 +70,13 @@ service.
 app/
   layout.tsx        # metadata, OpenGraph, theme-color, next/font wiring
   page.tsx          # composes the single-page site
-  globals.css       # global stylesheet (modern-minimal, two-tone)
+  globals.css       # global stylesheet (ivory / ink / beige, hairline system)
   fonts.ts          # Archivo (normal width) + Space Mono via next/font
 components/          # Nav, Hero, Work, WorkScene, Services, Process,
                      # Bilingual, Footer, Reveals
 config/site.ts      # ← single source of truth
 lib/whatsapp.ts     # builds wa.me links from the config
-lib/workShots.ts    # resolves /public/work screenshots (.png then .jpeg)
+lib/workShots.ts    # resolves each work screenshot (.png then .jpeg)
 public/og.png       # 1200×630 OpenGraph image (static asset)
 public/work/        # project screenshots (see public/work/README.md)
 scripts/og.html     # source used to render public/og.png
