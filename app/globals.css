@@ -64,11 +64,14 @@ section .wrap{position:relative}
 .workcard:nth-child(even){grid-template-columns:1fr 1.25fr}
 .workcard:nth-child(even) .shot{order:2}
 .workcard .wno{position:absolute;top:44px;right:0;font-family:var(--font-space-mono),monospace;font-size:11px;letter-spacing:.18em;color:var(--muted)}
-.shot{--hue:#C9943A;--hue2:#7D1F1F;aspect-ratio:16/10.5;border-radius:14px;overflow:hidden;position:relative;
-  background:linear-gradient(135deg, color-mix(in srgb, var(--hue) 50%, #111113) 0%, #111113 55%, color-mix(in srgb, var(--hue2) 42%, #111113) 100%);
+/* Screenshots render in full — width 100%, height auto; the card takes the
+   natural proportions of its image. The gradient fallback keeps a fixed ratio. */
+.shot{--hue:#C9943A;--hue2:#7D1F1F;border-radius:14px;overflow:hidden;position:relative;
   box-shadow:0 24px 60px -28px rgba(20,20,22,.4)}
+.shot.fallback{aspect-ratio:16/10.5;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--hue) 50%, #111113) 0%, #111113 55%, color-mix(in srgb, var(--hue2) 42%, #111113) 100%)}
 .shot .fw{position:absolute;inset:0;display:grid;place-items:center;color:#F2EFE7;font-weight:600;font-size:clamp(20px,2.4vw,30px);letter-spacing:-.01em;text-align:center;padding:0 20px}
-.shot img{object-fit:cover;object-position:50% 0%}
+.shot img{display:block;width:100%;height:auto}
 .winfo h3{font-weight:600;font-size:26px;letter-spacing:-.015em;padding-bottom:14px;border-bottom:1px solid rgba(20,20,22,.14);margin-bottom:14px}
 .winfo .meta{color:var(--muted);font-size:15px;margin-bottom:16px}
 .winfo p{color:var(--body);font-size:16px;max-width:420px}
@@ -113,14 +116,13 @@ footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;ma
 .rv{opacity:0;transform:translateY(12px)}
 .rv.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
 @media (prefers-reduced-motion: no-preference){
-  .shot img{transition:object-position 6s ease}
-  .workcard:hover .shot img{object-position:50% 100%}
+  .shot{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .workcard:hover .shot{transform:translateY(-5px)}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation:none!important;transition:none!important}
   .rv{opacity:1!important;transform:none!important}
   html{scroll-behavior:auto}
-  .workcard:hover .shot img{object-position:50% 0%!important}
 }
 
 :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
