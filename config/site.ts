@@ -56,7 +56,7 @@ export interface SectionHead {
 
 export const site = {
   /** "" → nav/footer show the "name in production" placeholder treatment. */
-  studioName: "",
+  studioName: "Atelier Digital",
 
   /** Placeholder. Every CTA builds a wa.me link from this. */
   whatsappNumber: "+9715XXXXXXXX",
