@@ -35,9 +35,10 @@ nav{position:sticky;top:0;z-index:50;background:rgba(246,244,239,.85);backdrop-f
 /* Logotype lockup — Instrument Serif italic "atelier" + Manrope "digital" */
 .logo-lockup{line-height:1}
 .lg-atelier{font-family:var(--font-instrument-serif),serif;font-style:italic;font-weight:400;text-transform:lowercase}
-.lg-digital{font-family:var(--font-manrope),sans-serif;font-weight:500;text-transform:lowercase}
-.logo-tone-ink .lg-atelier,.logo-tone-ink .lg-digital{color:var(--ink)}
-.logo-tone-ivory .lg-atelier,.logo-tone-ivory .lg-digital{color:#F6F4EF}
+.lg-digital{font-family:var(--font-manrope),sans-serif;font-weight:500;text-transform:lowercase;color:var(--beige)}
+/* two-colour lockup: "digital" is always beige; the tone recolours "atelier" only */
+.logo-tone-ink .lg-atelier{color:var(--ink)}
+.logo-tone-ivory .lg-atelier{color:#F6F4EF}
 .logo-inline{display:inline-flex;align-items:baseline;gap:.3em}
 .logo-inline .lg-atelier{font-size:29px}
 .logo-inline .lg-digital{font-size:19px;letter-spacing:-.005em}
