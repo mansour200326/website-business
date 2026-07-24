@@ -68,43 +68,55 @@ that file.
 
 ```
 app/
-  layout.tsx        # metadata, OpenGraph, theme-color, next/font wiring
+  layout.tsx        # metadata, OpenGraph, favicon/app icons, theme-color, fonts
   page.tsx          # composes the single-page site
   globals.css       # global stylesheet (ivory / ink / beige, hairline system)
-  fonts.ts          # Archivo (normal width) + Space Mono via next/font
+  fonts.ts          # Archivo + Space Mono (body); Instrument Serif + Manrope (logotype)
 components/          # Nav, Hero, Work, WorkScene, Services, Process,
-                     # Bilingual, Footer, Reveals
+                     # Bilingual, Footer, Reveals, Logo
 config/site.ts      # ← single source of truth
 lib/whatsapp.ts     # builds wa.me links from the config
 lib/workShots.ts    # resolves each work screenshot (.png then .jpeg)
+public/favicon.svg  # favicon — Instrument Serif italic "a", ink on ivory
+public/icon-32|180|512.png   # PNG icon fallbacks (favicon / apple-touch / large)
 public/og.png       # 1200×630 OpenGraph image (static asset)
 public/work/        # project screenshots (see public/work/README.md)
-scripts/og.html     # source used to render public/og.png
 ```
+
+## The logotype
+
+"Atelier Digital" renders as a typographic lockup (see `components/Logo.tsx`):
+"atelier" in **Instrument Serif** italic over/before "digital" in **Manrope**
+medium, both lowercase. The nav uses the one-line `inline` variant (ink); the
+footer uses the two-line `stacked` variant (ivory on the ink band). Instrument
+Serif and Manrope are loaded via `next/font` and used **only** in the logotype
+and favicon — body and headings stay Archivo. `config/site.ts` keeps
+`studioName: "Atelier Digital"` for the `<title>` and metadata.
 
 ## Fonts, performance & accessibility
 
-- Fonts load through `next/font/google` (Archivo at normal width, plus Space
-  Mono for tiny labels) — self-hosted, no layout shift.
+- Fonts load through `next/font/google` (Archivo + Space Mono for the site;
+  Instrument Serif + Manrope for the logotype) — self-hosted, no layout shift.
 - Work screenshots use `next/image` with aspect-ratio containers, so images
   reserve space and there is no CLS.
 - Motion is CSS-first and minimal: gentle fade-and-rise scroll reveals and a
   slow hover pan on the work screenshots; the page is statically prerendered.
 - `prefers-reduced-motion` is respected end-to-end: reveals show instantly and
   the screenshot pan is disabled.
-- Responsive down to 375px with no horizontal scroll; the reel and work scenes
-  are contained on mobile.
+- Responsive down to 375px with no horizontal scroll; the work cards stack on
+  mobile.
 
-## Regenerating the OG image
+## Regenerating the OG image & icons
 
-`public/og.png` is a committed static asset. To regenerate it after editing
-`scripts/og.html`, render that file to a 1200×630 PNG with any headless browser,
-e.g.:
+`public/og.png` is a committed static asset: the stacked logotype centered on
+ivory with the tagline in Archivo beneath. It was rendered from the app's own
+components (self-hosted fonts) via a temporary `/og-preview` route screenshotted
+at 1200×630. To regenerate, recreate that preview page and capture it, or
+re-render an equivalent 1200×630 composition.
 
-```bash
-chromium --headless=new --window-size=1200,630 \
-  --screenshot=public/og.png scripts/og.html
-```
+`public/favicon.svg` is self-contained (the Instrument Serif italic "a" as a
+vector path, ink on ivory); the PNG fallbacks `icon-32.png`, `icon-180.png`, and
+`icon-512.png` are rasterized from it.
 
 ## Deploying on Vercel
 

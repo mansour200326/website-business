@@ -1,4 +1,4 @@
-import { Archivo, Space_Mono } from "next/font/google";
+import { Archivo, Space_Mono, Instrument_Serif, Manrope } from "next/font/google";
 
 /**
  * Archivo — variable font at normal width. Used for headings and body at
@@ -17,4 +17,23 @@ export const spaceMono = Space_Mono({
   weight: ["400"],
   display: "swap",
   variable: "--font-space-mono",
+});
+
+/**
+ * Instrument Serif (italic, 400) and Manrope (medium, 500) — used ONLY for the
+ * "Atelier Digital" logotype (and the favicon). Not for body or headings.
+ */
+export const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: "italic",
+  display: "swap",
+  variable: "--font-instrument-serif",
+});
+
+export const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["500"],
+  display: "swap",
+  variable: "--font-manrope",
 });
