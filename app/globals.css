@@ -30,8 +30,20 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-archivo),sans-
 /* ---------- NAV ---------- */
 nav{position:sticky;top:0;z-index:50;background:rgba(246,244,239,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(20,20,22,.14)}
 .nav-in{max-width:1080px;margin:0 auto;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:600;font-size:17px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
-.logo span{color:var(--muted);font-weight:400;font-size:13px;margin-left:10px}
+.logo{display:inline-flex;text-decoration:none}
+
+/* Logotype lockup — Instrument Serif italic "atelier" + Manrope "digital" */
+.logo-lockup{line-height:1}
+.lg-atelier{font-family:var(--font-instrument-serif),serif;font-style:italic;font-weight:400;text-transform:lowercase}
+.lg-digital{font-family:var(--font-manrope),sans-serif;font-weight:500;text-transform:lowercase}
+.logo-tone-ink .lg-atelier,.logo-tone-ink .lg-digital{color:var(--ink)}
+.logo-tone-ivory .lg-atelier,.logo-tone-ivory .lg-digital{color:#F6F4EF}
+.logo-inline{display:inline-flex;align-items:baseline;gap:.3em}
+.logo-inline .lg-atelier{font-size:29px}
+.logo-inline .lg-digital{font-size:19px;letter-spacing:-.005em}
+.logo-stacked{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:.9}
+.logo-stacked .lg-atelier{font-size:37px}
+.logo-stacked .lg-digital{font-size:30px}
 nav .links{display:flex;gap:30px;align-items:center}
 nav .links a{color:var(--ink);text-decoration:none;font-size:15px;opacity:.75;transition:opacity .2s}
 nav .links a:hover{opacity:1}
@@ -106,6 +118,7 @@ section .wrap{position:relative}
 
 /* ---------- FOOTER ---------- */
 footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;margin:0 20px;padding:110px 0 50px}
+.f-logo{margin-bottom:34px}
 .f-title{font-weight:600;font-size:clamp(30px,4vw,52px);letter-spacing:-.02em;margin-bottom:18px;color:#F6F4EF}
 .f-sub{color:#A5A199;font-size:17px;margin-bottom:40px;max-width:440px}
 .btn-wa{display:inline-block;background:var(--beige);color:var(--ink);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s}

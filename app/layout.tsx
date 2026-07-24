@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { archivo, spaceMono } from "./fonts";
+import { archivo, spaceMono, instrumentSerif, manrope } from "./fonts";
 import { site } from "@/config/site";
 import "./globals.css";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Sites that ship in days — Independent Web Studio, Dubai",
+        alt: "Atelier Digital — sites that ship in days, and look like they took months.",
       },
     ],
   },
@@ -33,6 +33,14 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-180.png", sizes: "180x180" }],
   },
 };
 
@@ -55,7 +63,9 @@ export default function RootLayout({
           <style>{`.rv{opacity:1 !important;transform:none !important}`}</style>
         </noscript>
       </head>
-      <body className={`${archivo.variable} ${spaceMono.variable}`}>
+      <body
+        className={`${archivo.variable} ${spaceMono.variable} ${instrumentSerif.variable} ${manrope.variable}`}
+      >
         {children}
       </body>
     </html>

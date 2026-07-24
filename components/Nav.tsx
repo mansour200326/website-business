@@ -1,19 +1,11 @@
-import { site, monogram, NAME_PLACEHOLDER } from "@/config/site";
+import Logo from "./Logo";
 
 export default function Nav() {
-  const { studioName } = site;
   return (
     <nav>
       <div className="nav-in">
-        <a className="logo" href="#top" aria-label={studioName || NAME_PLACEHOLDER}>
-          {studioName ? (
-            studioName
-          ) : (
-            <>
-              {monogram(studioName)}
-              <span>· {NAME_PLACEHOLDER}</span>
-            </>
-          )}
+        <a className="logo" href="#top" aria-label="Atelier Digital — home">
+          <Logo variant="inline" tone="ink" />
         </a>
         <div className="links">
           <a href="#work">Work</a>

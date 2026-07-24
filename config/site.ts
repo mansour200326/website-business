@@ -181,10 +181,5 @@ export const site = {
 
 export type Site = typeof site;
 
-/** Placeholder shown wherever the studio name isn't set yet. */
+/** Placeholder used for the © line when studioName isn't set yet. */
 export const NAME_PLACEHOLDER = "name in production";
-
-/** Nav monogram / logo initial. */
-export function monogram(studioName: string): string {
-  return studioName ? studioName.trim().charAt(0).toUpperCase() : "M";
-}
