@@ -61,6 +61,9 @@ export const site = {
   /** Placeholder. Every CTA builds a wa.me link from this. */
   whatsappNumber: "+9715XXXXXXXX",
 
+  /** Contact email for data / privacy questions. Replace with your real address. */
+  contactEmail: "privacy@atelierdigital.com",
+
   /** Pre-filled WhatsApp messages. `{service}` is swapped for the service name. */
   whatsapp: {
     general: "Hi — I'd like to get a quote for a website.",

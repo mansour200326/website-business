@@ -4,14 +4,14 @@ export default function Nav() {
   return (
     <nav>
       <div className="nav-in">
-        <a className="logo" href="#top" aria-label="Atelier Digital — home">
+        <a className="logo" href="/#top" aria-label="Atelier Digital — home">
           <Logo variant="inline" tone="ink" />
         </a>
         <div className="links">
-          <a href="#work">Work</a>
-          <a href="#services">Services</a>
-          <a href="#process">Process</a>
-          <a className="cta" href="#contact">
+          <a href="/#work">Work</a>
+          <a href="/#services">Services</a>
+          <a href="/#process">Process</a>
+          <a className="cta" href="/#contact">
             Get a quote
           </a>
         </div>
