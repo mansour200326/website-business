@@ -125,6 +125,16 @@ footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;ma
 .btn-wa{display:inline-block;background:var(--beige);color:var(--ink);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s}
 .btn-wa:hover{background:#A99F8C}
 .f-meta{margin-top:90px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#8A867D;font-size:13px;border-top:1px solid rgba(246,244,239,.16);padding-top:26px}
+.f-link{color:#8A867D;text-decoration:none;border-bottom:1px solid rgba(184,175,158,.45);padding-bottom:1px;transition:color .2s,border-color .2s}
+.f-link:hover{color:#F6F4EF;border-color:#F6F4EF}
+
+/* ---------- LEGAL / PRIVACY ---------- */
+.legal-page{padding:118px 0 130px}
+.legal-page h1{margin-bottom:24px}
+.legal{max-width:660px}
+.legal .lead{font-size:19px;color:var(--muted);margin-bottom:44px}
+.legal h2{font-weight:600;font-size:19px;letter-spacing:-.01em;margin:40px 0 12px}
+.legal p{color:var(--body);margin-bottom:14px}
 
 /* ---------- MOTION ---------- */
 .rv{opacity:0;transform:translateY(12px)}

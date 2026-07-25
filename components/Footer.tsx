@@ -20,6 +20,9 @@ export default function Footer() {
           {footer.meta.map((line) => (
             <span key={line}>{line}</span>
           ))}
+          <a className="f-link" href="/privacy">
+            Privacy
+          </a>
           <span>© {name}</span>
         </div>
       </div>
