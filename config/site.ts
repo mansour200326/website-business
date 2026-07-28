@@ -30,12 +30,12 @@ export interface Package {
   description: string;
 }
 
-export interface ProcessStep {
-  /** day marker, e.g. "Day 0" or "Days 2–4" */
-  day: string;
-  /** step title */
+export interface Phase {
+  /** phase label, e.g. "Week 1" */
+  label: string;
+  /** phase title */
   title: string;
-  /** step description */
+  /** phase description */
   text: string;
 }
 
@@ -59,7 +59,7 @@ export const site = {
   meta: {
     title: "Websmith — Independent Web Studio, Dubai",
     description:
-      "Websmith forges custom brand websites in Dubai — real motion, native Arabic, shipped in days. A Web Smith FZCO company.",
+      "Websmith forges custom brand websites in Dubai — real motion, native Arabic, delivered in two to three weeks. A Web Smith FZCO company.",
     url: "https://websmith.ae",
     themeColor: "#F6F4EF",
   },
@@ -72,35 +72,28 @@ export const site = {
     cta: "Start on WhatsApp",
   },
 
-  /** PORTFOLIO — each project is a full-viewport moment */
+  /** PORTFOLIO — exactly three projects, each a full-viewport moment */
   portfolio: [
     {
       slug: "sumou-jet",
       name: "Sumou Jet",
       blurb: "Private jet charter, forged for the Gulf's most demanding travellers.",
-      liveUrl: "https://sumou-jet.example",
+      liveUrl: "https://sumoujet.com",
       tint: "#EDF0F3",
     },
     {
       slug: "grailhaus",
       name: "Grailhaus",
       blurb: "A one-of-one trading-card vault where collectors make offers, not orders.",
-      liveUrl: "https://grailhaus.example",
+      liveUrl: "https://grailhaus.com",
       tint: "#F4EFE6",
     },
     {
-      slug: "rack-on",
-      name: "Rack On",
-      blurb: "Barbell-grade e-commerce for a strength brand that doesn't do subtle.",
-      liveUrl: "https://rack-on.example",
-      tint: "#F1EFEA",
-    },
-    {
-      slug: "prairies-fodder",
-      name: "Prairies Fodder",
-      blurb: "Farm-to-trough commerce for a prairie feed supplier, built to move tonnes.",
-      liveUrl: "https://prairies-fodder.example",
-      tint: "#EDF1EA",
+      slug: "maison-padel",
+      name: "Maison Padel",
+      blurb: "Dubai's first luxury indoor padel club — brand, booking, and a bilingual members' world.",
+      liveUrl: "https://maisonpadel.ae",
+      tint: "#ECF1EE",
     },
   ] as Project[],
 
@@ -110,7 +103,7 @@ export const site = {
       name: "Launch",
       subject: "Launch",
       description:
-        "A custom brand site, forged in days — everything you need to look established from day one.",
+        "A custom brand site that makes you look established from the first visit — structure, design, and content, done properly.",
     },
     {
       name: "Store",
@@ -126,17 +119,16 @@ export const site = {
     },
   ] as Package[],
 
-  /** ABOUT / PROCESS */
+  /** ABOUT / PROCESS — delivery positioned as two to three weeks (no day counts) */
   about: {
-    title: "One smith. Measured in days, not months.",
-    body: "Websmith is one independent studio in Dubai — design, build, motion, and native Arabic under one roof. No agency overhead, no six-week timelines. You talk to the person doing the work.",
+    title: "One smith. Two to three weeks, start to launch.",
+    body: "Websmith is one independent studio in Dubai — design, build, motion, and native Arabic under one roof. No agency overhead, no drawn-out timelines. You talk to the person doing the work.",
   },
   process: [
-    { day: "Day 0", title: "Brief", text: "One call or one voice note — I take it from there." },
-    { day: "Day 1", title: "Draft", text: "A working design in your hands, with real motion." },
-    { day: "Days 2–4", title: "Build", text: "The full site, previewed live as it grows." },
-    { day: "Day 5", title: "Ship", text: "Your domain, your accounts, your keys." },
-  ] as ProcessStep[],
+    { label: "Week 1", title: "Foundation", text: "Brand direction, structure, and the design concept — the shape of the whole thing agreed before a pixel is built." },
+    { label: "Week 2", title: "The build", text: "Design and development in parallel, your content in place, previewed live as it grows." },
+    { label: "Week 3", title: "Polish & launch", text: "Refinements, testing across every device, then go live on your own domain and accounts." },
+  ] as Phase[],
 
   /** CLOSE — where the dot lands, in the WhatsApp CTA */
   close: {
