@@ -46,9 +46,24 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
         const s = dotSize();
         return { x: r.left + r.width / 2 - s / 2, y: r.top + r.height / 2 - s / 2 };
       };
-      const dockTo = (el: HTMLElement, dur = 0.55) =>
-        gsap.to(dot, { ...posOf(el), duration: dur, ease: "power2.out", overwrite: "auto" });
-      const setDot = (el: HTMLElement) => gsap.set(dot, { ...posOf(el), opacity: 1 });
+      // The dot smoothly follows whichever section's anchor is active — quickTo
+      // gives the 0.5–0.6s ease-out glide between docking anchors, and following
+      // the live position keeps it beside the title as the section scrolls.
+      let active: HTMLElement = heroSlot;
+      let following = false;
+      const qx = gsap.quickTo(dot, "x", { duration: 0.55, ease: "power2.out" });
+      const qy = gsap.quickTo(dot, "y", { duration: 0.55, ease: "power2.out" });
+      const follow = () => {
+        const p = posOf(active);
+        qx(p.x);
+        qy(p.y);
+      };
+      const startFollow = () => {
+        if (following) return;
+        following = true;
+        gsap.set(dot, { opacity: 1 });
+        gsap.ticker.add(follow);
+      };
 
       // ---- non-dot scroll choreography (safe to attach immediately) ----
       gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
@@ -70,12 +85,15 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }),
         });
       });
+      // Internal full-page reveal: object-position scrolls the framed screenshot
+      // from its top to its bottom as the project passes. For a tall full-page
+      // capture this reveals the entire page; for a short image it barely moves.
       gsap.utils.toArray<HTMLElement>(".pf-img").forEach((img) => {
         gsap.fromTo(
           img,
-          { yPercent: 0 },
+          { "--pp": 0 },
           {
-            yPercent: -21,
+            "--pp": 100,
             ease: "none",
             scrollTrigger: { trigger: img.closest(".pf-view"), start: "top bottom", end: "bottom top", scrub: true },
           }
@@ -108,21 +126,29 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
       });
 
       // ---- the travelling dot ----
+      let breathed = false;
+      const breathe = () => {
+        if (breathed) return;
+        breathed = true;
+        gsap.fromTo(".close-cta .btn", { scale: 1 }, { scale: 1.05, duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" });
+      };
       const attachDotScroll = () => {
-        const anchors = gsap.utils.toArray<HTMLElement>("[data-dot-anchor]");
-        anchors.forEach((el) => {
+        active = heroSlot;
+        startFollow();
+        gsap.utils.toArray<HTMLElement>("[data-dot-anchor]").forEach((el) => {
           const section = el.closest<HTMLElement>(".pf, .section, .hero, .close") || el;
           const isClose = el.getAttribute("data-dot-anchor") === "close";
           ScrollTrigger.create({
             trigger: section,
-            start: "top center",
-            end: "bottom center",
+            start: "top 58%",
+            end: "bottom 42%",
             onEnter: () => {
-              dockTo(el);
-              if (isClose)
-                gsap.fromTo(".close-cta .btn", { scale: 1 }, { scale: 1.05, duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" });
+              active = el;
+              if (isClose) breathe();
             },
-            onEnterBack: () => dockTo(el),
+            onEnterBack: () => {
+              active = el;
+            },
           });
         });
         ScrollTrigger.refresh();
@@ -134,7 +160,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
 
       if (played) {
         gsap.set(letters, { yPercent: 0, opacity: 1 });
-        setDot(heroSlot);
+        gsap.set(dot, { ...posOf(heroSlot), opacity: 1 });
         attachDotScroll();
       } else {
         const mark = document.querySelector<HTMLElement>(".hero-mark")!;
@@ -172,7 +198,10 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
       // keep the dot glued to the active anchor on resize
       const onResize = () => ScrollTrigger.refresh();
       window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
+      return () => {
+        window.removeEventListener("resize", onResize);
+        gsap.ticker.remove(follow);
+      };
     }, rootRef);
 
     // ---- magnetic buttons (desktop, fine pointer) ----
@@ -228,7 +257,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           <p className="hero-tagline">{hero.tagline}</p>
           <p className="hero-support">{hero.support}</p>
           <div className="hero-cta">
-            <a className="btn btn-cyan" data-magnetic href={waLink()} target="_blank" rel="noopener noreferrer">
+            <a className="btn" data-magnetic href={waLink()} target="_blank" rel="noopener noreferrer">
               {hero.cta}
             </a>
             <a className="tlink sweep" href="#work">
@@ -325,8 +354,8 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           <p className="about-body reveal-fade">{about.body}</p>
           <div className="steps">
             {process.map((s) => (
-              <div className="step reveal-fade" key={s.day}>
-                <div className="d">{s.day}</div>
+              <div className="step reveal-fade" key={s.label}>
+                <div className="d">{s.label}</div>
                 <h4>{s.title}</h4>
                 <p>{s.text}</p>
               </div>
@@ -341,7 +370,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           </h2>
           <p className="close-support reveal-fade">{close.support}</p>
           <div className="close-cta">
-            <a className="btn btn-cyan" data-magnetic href={waLink()} target="_blank" rel="noopener noreferrer">
+            <a className="btn" data-magnetic href={waLink()} target="_blank" rel="noopener noreferrer">
               <span className="slot" data-dot-anchor="close" aria-hidden="true" />
               {close.cta}
             </a>

@@ -1,26 +1,29 @@
 # Portfolio screenshots
 
-Each project on the homepage shows a full-page screenshot inside a browser
-frame that parallax-scrolls as you pass it. Drop the real screenshots here.
+Exactly three projects. Each shows a screenshot inside a browser frame that
+scrolls **internally** as the visitor passes — for a tall full-page capture this
+reveals the whole page top-to-bottom.
 
-## Exact files (one per project, named by its `slug` in `config/site.ts`)
+## Exact files — drop full-page captures here (`/public/portfolio/`)
 
-| Project          | File                              | Status                    |
-| ---------------- | --------------------------------- | ------------------------- |
-| Sumou Jet        | `sumou-jet.jpg`                   | ✅ real screenshot        |
-| Grailhaus        | `grailhaus.jpg`                   | ✅ real screenshot        |
-| Rack On          | `rack-on.png`                     | ⛔ **placeholder — replace** |
-| Prairies Fodder  | `prairies-fodder.png`             | ⛔ **placeholder — replace** |
+| Project      | Live site        | File (any of `.jpg` / `.jpeg` / `.png`) | Status                          |
+| ------------ | ---------------- | --------------------------------------- | ------------------------------- |
+| Sumou Jet    | sumoujet.com     | `sumou-jet.jpg`                         | interim (single-viewport) — replace |
+| Grailhaus    | grailhaus.com    | `grailhaus.jpg`                         | interim (single-viewport) — replace |
+| Maison Padel | maisonpadel.ae   | `maison-padel.png`                      | interim (single-viewport) — replace |
 
-Any of `.jpg`, `.jpeg`, or `.png` is accepted (resolved in that order). If a
-file is missing the frame falls back to a clean tinted panel.
+**Please replace each with a full-page screenshot** — the entire scrollable
+page, top to bottom (e.g. a browser "capture full page" export, ~1440px wide and
+as tall as the page). The frame is already sized for tall images: it crops to a
+browser-window shape and the `object-position` reveal walks the image from its
+top to its bottom as the project scrolls past. The current interim images are
+single-viewport captures of each site, so they fill the frame but there is little
+to reveal until the full-page versions are dropped in.
 
 ## Notes
 
-- **Tall, full-page captures work best** — the image is shown at 128% of the
-  frame height and parallax-scrolls through as the visitor passes, so the more
-  vertical page you capture, the more there is to reveal.
-- Images are served through `next/image` (optimised + lazy-loaded below the
-  fold); intrinsic size is read at build time so there is no layout shift.
-- To add or rename a project, edit the `portfolio` array in `config/site.ts`
-  (the `slug` drives the filename) and drop the matching image here.
+- Filenames are driven by each project's `slug` in `config/site.ts` (resolved
+  `.jpg → .jpeg → .png`). To change projects, edit the `portfolio` array there.
+- Images are served through `next/image` — optimised, lazy-loaded below the
+  fold, with intrinsic sizes read at build time so there is no layout shift.
+- If a file is missing, the frame falls back to a clean tinted panel.

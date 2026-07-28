@@ -103,9 +103,13 @@ All scroll choreography is GSAP + ScrollTrigger, set up in `components/Home.tsx`
 - **Kinetic type** — section headlines split into words and rise-and-settle on
   scroll; body text fades up; a huge Instrument Serif *Websmith* watermark drifts
   behind alternating sections at 4% opacity.
-- **Portfolio** — each project is a full-viewport moment; its browser-framed
-  screenshot parallax-scrolls inside the frame, and the background tints toward
-  the project's palette at very low saturation, returning to ivory between.
+- **Portfolio** — exactly three projects (Sumou Jet, Grailhaus, Maison Padel),
+  each a full-viewport moment with tight spacing so the next peeks as one ends.
+  A browser-framed screenshot scrolls **internally** (an `object-position`
+  reveal) so a tall full-page capture unspools top-to-bottom as you pass, and
+  the background tints toward the project's palette at very low saturation,
+  returning to ivory between. Drop full-page captures into `/public/portfolio/`
+  (see its README for the exact filenames).
 - **Micro-interactions** — magnetic hover on primary buttons (desktop only),
   a cyan underline sweep on text links, 2px card lift.
 

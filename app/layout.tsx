@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Websmith — sites that ship in days, and look like they took months.",
+        alt: "Websmith — websites, forged properly.",
       },
     ],
   },
