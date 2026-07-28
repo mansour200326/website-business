@@ -35,37 +35,44 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
 
     gsap.registerPlugin(ScrollTrigger);
     const dot = dotRef.current!;
+    const isMobile = window.matchMedia("(max-width: 820px)").matches;
     document.body.classList.add("dot-live"); // hide the static period; the travelling dot takes over
 
     const ctx = gsap.context(() => {
       const heroSlot = document.querySelector<HTMLElement>('[data-dot-anchor="hero"]')!;
       const dotSize = () => dot.offsetWidth || 14;
-
       const posOf = (el: HTMLElement) => {
         const r = el.getBoundingClientRect();
         const s = dotSize();
         return { x: r.left + r.width / 2 - s / 2, y: r.top + r.height / 2 - s / 2 };
       };
-      // The dot smoothly follows whichever section's anchor is active — quickTo
-      // gives the 0.5–0.6s ease-out glide between docking anchors, and following
-      // the live position keeps it beside the title as the section scrolls.
+
+      // ---- the dot: transforms only, continuous rAF lerp toward the active
+      // anchor (closes ~14% of the remaining distance each frame). This flows
+      // smoothly during momentum scrolling with no snapping — never top/left. ----
       let active: HTMLElement = heroSlot;
-      let following = false;
-      const qx = gsap.quickTo(dot, "x", { duration: 0.55, ease: "power2.out" });
-      const qy = gsap.quickTo(dot, "y", { duration: 0.55, ease: "power2.out" });
-      const follow = () => {
+      let cx = 0;
+      let cy = 0;
+      let rafId = 0;
+      let ticking = false;
+      const applyDot = () => {
+        dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+      };
+      const tick = () => {
         const p = posOf(active);
-        qx(p.x);
-        qy(p.y);
+        cx += (p.x - cx) * 0.14;
+        cy += (p.y - cy) * 0.14;
+        applyDot();
+        rafId = requestAnimationFrame(tick);
       };
       const startFollow = () => {
-        if (following) return;
-        following = true;
-        gsap.set(dot, { opacity: 1 });
-        gsap.ticker.add(follow);
+        if (ticking) return;
+        ticking = true;
+        dot.style.opacity = "1";
+        rafId = requestAnimationFrame(tick);
       };
 
-      // ---- non-dot scroll choreography (safe to attach immediately) ----
+      // ---- reveals: transform + opacity only ----
       gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
         const words = k.querySelectorAll(".kin-word");
         gsap.set(words, { yPercent: 115 });
@@ -73,7 +80,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           trigger: k,
           start: "top 78%",
           once: true,
-          onEnter: () => gsap.to(words, { yPercent: 0, duration: 0.55, stagger: 0.08, ease: "power3.out" }),
+          onEnter: () => gsap.to(words, { yPercent: 0, duration: 0.55, stagger: 0.08, ease: "power3.out", force3D: true }),
         });
       });
       gsap.utils.toArray<HTMLElement>(".reveal-fade").forEach((el) => {
@@ -82,34 +89,40 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           trigger: el,
           start: "top 85%",
           once: true,
-          onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }),
+          onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }),
         });
       });
-      // Internal full-page reveal: object-position scrolls the framed screenshot
-      // from its top to its bottom as the project passes. For a tall full-page
-      // capture this reveals the entire page; for a short image it barely moves.
+      // Internal full-page reveal — a GPU translate (never object-position) walks
+      // the framed screenshot from its top to its bottom as the project passes.
+      // For a tall full-page capture this reveals the whole page.
       gsap.utils.toArray<HTMLElement>(".pf-img").forEach((img) => {
+        const view = img.closest<HTMLElement>(".pf-view")!;
         gsap.fromTo(
           img,
-          { "--pp": 0 },
+          { y: 0 },
           {
-            "--pp": 100,
+            y: () => Math.min(0, -(img.offsetHeight - view.offsetHeight)),
             ease: "none",
-            scrollTrigger: { trigger: img.closest(".pf-view"), start: "top bottom", end: "bottom top", scrub: true },
+            force3D: true,
+            scrollTrigger: { trigger: view, start: "top bottom", end: "bottom top", scrub: true, invalidateOnRefresh: true },
           }
         );
       });
-      gsap.utils.toArray<HTMLElement>(".watermark").forEach((w) => {
-        gsap.fromTo(
-          w,
-          { yPercent: -8 },
-          {
-            yPercent: 8,
-            ease: "none",
-            scrollTrigger: { trigger: w.closest(".section, .pf"), start: "top bottom", end: "bottom top", scrub: true },
-          }
-        );
-      });
+      // Ghost watermark parallax — desktop only (static on mobile).
+      if (!isMobile) {
+        gsap.utils.toArray<HTMLElement>(".watermark").forEach((w) => {
+          gsap.fromTo(
+            w,
+            { yPercent: -8 },
+            {
+              yPercent: 8,
+              ease: "none",
+              force3D: true,
+              scrollTrigger: { trigger: w.closest(".section, .pf"), start: "top bottom", end: "bottom top", scrub: true },
+            }
+          );
+        });
+      }
       const tintLayer = document.querySelector<HTMLElement>(".tint-layer")!;
       gsap.utils.toArray<HTMLElement>("[data-tint]").forEach((sec) => {
         const color = sec.getAttribute("data-tint")!;
@@ -125,7 +138,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
         });
       });
 
-      // ---- the travelling dot ----
+      // ---- dot docking anchors ----
       let breathed = false;
       const breathe = () => {
         if (breathed) return;
@@ -154,53 +167,59 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
         ScrollTrigger.refresh();
       };
 
-      // ---- intro (once per session) ----
+      // ---- intro: the dot writes the wordmark — EVERY page load ----
       const letters = gsap.utils.toArray<HTMLElement>(".hm-l");
-      const played = sessionStorage.getItem("ws_intro_played") === "1";
+      const mark = document.querySelector<HTMLElement>(".hero-mark")!;
+      const mr = mark.getBoundingClientRect();
+      const s = dotSize();
+      const end = posOf(heroSlot);
+      gsap.set(letters, { yPercent: 125, opacity: 0 });
+      cx = mr.left - 30;
+      cy = mr.top + mr.height * 0.52 - s / 2;
+      applyDot();
+      dot.style.opacity = "1";
 
-      if (played) {
-        gsap.set(letters, { yPercent: 0, opacity: 1 });
-        gsap.set(dot, { ...posOf(heroSlot), opacity: 1 });
-        attachDotScroll();
-      } else {
-        const mark = document.querySelector<HTMLElement>(".hero-mark")!;
-        const mr = mark.getBoundingClientRect();
-        const s = dotSize();
-        const end = posOf(heroSlot);
-        gsap.set(letters, { yPercent: 125, opacity: 0 });
-        gsap.set(dot, { x: mr.left - 30, y: mr.top + mr.height * 0.52 - s / 2, opacity: 1 });
+      const finish = () => attachDotScroll();
+      const proxy = { x: cx, y: cy };
+      const sync = () => {
+        cx = proxy.x;
+        cy = proxy.y;
+        applyDot();
+      };
+      const tl = gsap.timeline({ onUpdate: sync, onComplete: finish });
+      tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.11, ease: "back.out(1.6)", force3D: true }, 0.1);
+      tl.to(proxy, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
+      tl.to(proxy, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
+      tl.to(proxy, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
 
-        const finish = () => {
-          sessionStorage.setItem("ws_intro_played", "1");
-          attachDotScroll();
-        };
-        const tl = gsap.timeline({ onComplete: finish });
-        tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.11, ease: "back.out(1.6)" }, 0.1);
-        tl.to(dot, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
-        tl.to(dot, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
-        tl.to(dot, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
+      const skip = () => {
+        if (tl.progress() < 1) {
+          tl.progress(1);
+          tl.kill();
+          gsap.set(letters, { yPercent: 0, opacity: 1 });
+          cx = end.x;
+          cy = end.y;
+          applyDot();
+          finish();
+        }
+        removeSkip();
+      };
+      const evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
+      const removeSkip = () => evts.forEach((e) => window.removeEventListener(e, skip));
+      evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
 
-        const skip = () => {
-          if (tl.progress() < 1) {
-            tl.progress(1);
-            tl.kill();
-            gsap.set(letters, { yPercent: 0, opacity: 1 });
-            gsap.set(dot, { ...end });
-            finish();
-          }
-          remove();
-        };
-        const evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
-        const remove = () => evts.forEach((e) => window.removeEventListener(e, skip));
-        evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
-      }
+      // ---- recalc anchor positions on resize and after images load ----
+      const refresh = () => ScrollTrigger.refresh();
+      window.addEventListener("resize", refresh, { passive: true });
+      window.addEventListener("load", refresh, { once: true });
+      gsap.utils.toArray<HTMLImageElement>(".pf-img").forEach((im) => {
+        if (!im.complete) im.addEventListener("load", refresh, { once: true });
+      });
 
-      // keep the dot glued to the active anchor on resize
-      const onResize = () => ScrollTrigger.refresh();
-      window.addEventListener("resize", onResize);
       return () => {
-        window.removeEventListener("resize", onResize);
-        gsap.ticker.remove(follow);
+        cancelAnimationFrame(rafId);
+        window.removeEventListener("resize", refresh);
+        removeSkip();
       };
     }, rootRef);
 

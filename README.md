@@ -91,25 +91,28 @@ public/og.png       # 1200×630 OpenGraph image
 
 All scroll choreography is GSAP + ScrollTrigger, set up in `components/Home.tsx`:
 
-- **Intro** — on first load (once per session, `sessionStorage`) the cyan dot
-  sweeps across the hero and the letters of *Websmith* rise behind it, the dot
-  settling as the period with a slight overshoot. Any click / tap / scroll /
-  keypress skips instantly to the finished state.
-- **The travelling dot** — one `position:fixed` element that animates between
-  docking anchors: the hero period, an invisible anchor beside each section
-  title, and finally a reserved slot inside the WhatsApp CTA (which then plays a
-  single "breathe"). The static period in the wordmark is the no-JS / reduced
-  fallback.
+- **Intro** — on every page load the cyan dot sweeps across the hero and the
+  letters of *Websmith* rise behind it, the dot settling as the period with a
+  slight overshoot. Any click / tap / scroll / keypress skips instantly to the
+  finished state.
+- **The travelling dot** — one `position:fixed` element moved with
+  `transform: translate3d` only (never top/left). A continuous
+  `requestAnimationFrame` lerp glides it toward its current target anchor — the
+  hero period, an invisible anchor beside each section title, and finally a
+  reserved slot inside the WhatsApp CTA (which then plays a single "breathe") —
+  so it flows smoothly through momentum scrolling with no snapping. The static
+  period in the wordmark is the no-JS / reduced fallback.
 - **Kinetic type** — section headlines split into words and rise-and-settle on
   scroll; body text fades up; a huge Instrument Serif *Websmith* watermark drifts
-  behind alternating sections at 4% opacity.
+  behind alternating sections at 4% opacity (the drift is desktop-only — on
+  mobile it stays static for performance).
 - **Portfolio** — exactly three projects (Sumou Jet, Grailhaus, Maison Padel),
   each a full-viewport moment with tight spacing so the next peeks as one ends.
-  A browser-framed screenshot scrolls **internally** (an `object-position`
-  reveal) so a tall full-page capture unspools top-to-bottom as you pass, and
-  the background tints toward the project's palette at very low saturation,
-  returning to ivory between. Drop full-page captures into `/public/portfolio/`
-  (see its README for the exact filenames).
+  A browser-framed screenshot scrolls **internally** — a GPU `transform` walks
+  the image top-to-bottom (never `object-position`) so a tall full-page capture
+  unspools as you pass, and the background tints toward the project's palette at
+  very low saturation, returning to ivory between. Drop full-page captures into
+  `/public/portfolio/` (compressed WebP; see its README for exact filenames).
 - **Micro-interactions** — magnetic hover on primary buttons (desktop only),
   a cyan underline sweep on text links, 2px card lift.
 
