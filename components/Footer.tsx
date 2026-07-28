@@ -1,15 +1,14 @@
-import { site, NAME_PLACEHOLDER } from "@/config/site";
+import { site } from "@/config/site";
 import { waLink } from "@/lib/whatsapp";
 import Logo from "./Logo";
 
 export default function Footer() {
-  const name = site.studioName || NAME_PLACEHOLDER;
   const { footer } = site;
   return (
     <footer id="contact">
       <div className="wrap">
         <div className="f-logo rv">
-          <Logo variant="stacked" tone="ivory" />
+          <Logo variant="display" tone="ivory" />
         </div>
         <div className="f-title rv">{footer.title}</div>
         <p className="f-sub rv">{footer.sub}</p>
@@ -23,8 +22,9 @@ export default function Footer() {
           <a className="f-link" href="/privacy">
             Privacy
           </a>
-          <span>© {name}</span>
+          <span>© Websmith</span>
         </div>
+        <p className="f-legal">{footer.legal}</p>
       </div>
     </footer>
   );

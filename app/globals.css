@@ -1,22 +1,19 @@
 /*
- * Ported from studio-minimal-ivory-v3.html — ivory / ink / beige minimal.
- * Adaptations from the source file:
- *  - CSS variables use semantic names (--ink / --beige …); the values are
- *    unchanged from the source.
- *  - The source's two leftover cool-toned hover/hairline values are replaced
- *    with ink/warm equivalents — the palette is strictly ivory/ink/beige.
- *  - Font families are wired to the next/font CSS variables.
- * Screenshots fill the work cards (browser chrome removed) and get a slow
- * object-position hover pan; button/card translate motion is dropped so the
- * only motion is fade-rise reveals + the pan.
+ * Websmith — ivory / ink minimal with a single cyan accent.
+ * Cyan is used sparingly, as the only accent (the wordmark period, link
+ * underlines, the footer button). Font families are wired to the next/font
+ * CSS variables. Screenshots
+ * fill the work cards (browser chrome removed) with a slow object-position
+ * hover pan; the only motion is fade-rise reveals + the pan.
  */
 
 :root{
   --bg:#F6F4EF;         /* ivory page */
-  --surface:#EDEAE2;    /* beige surface band */
+  --surface:#EDEAE2;    /* warm surface band */
   --ink:#141416;        /* ink */
   --ink-deep:#0E0E10;   /* footer ink */
-  --beige:#B8AF9E;      /* single beige accent — link underlines + footer button only */
+  --cyan:#00B5C8;       /* single cyan accent — wordmark period, link underlines, footer button */
+  --cyan-deep:#0097A7;  /* cyan hover */
   --muted:#6E6A61;      /* muted labels */
   --body:#4C4A44;       /* body copy on ivory/surface */
 }
@@ -32,19 +29,13 @@ nav{position:sticky;top:0;z-index:50;background:rgba(246,244,239,.85);backdrop-f
 .nav-in{max-width:1080px;margin:0 auto;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
 .logo{display:inline-flex;text-decoration:none}
 
-/* Logotype lockup — Instrument Serif italic "atelier" + Manrope "digital" */
-.logo-lockup{line-height:1}
-.lg-atelier{font-family:var(--font-instrument-serif),serif;font-style:italic;font-weight:400;text-transform:lowercase}
-.lg-digital{font-family:var(--font-manrope),sans-serif;font-weight:500;text-transform:lowercase;color:var(--beige)}
-/* two-colour lockup: "digital" is always beige; the tone recolours "atelier" only */
-.logo-tone-ink .lg-atelier{color:var(--ink)}
-.logo-tone-ivory .lg-atelier{color:#F6F4EF}
-.logo-inline{display:inline-flex;align-items:baseline;gap:.3em}
-.logo-inline .lg-atelier{font-size:29px}
-.logo-inline .lg-digital{font-size:19px;letter-spacing:-.005em}
-.logo-stacked{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:.9}
-.logo-stacked .lg-atelier{font-size:37px}
-.logo-stacked .lg-digital{font-size:30px}
+/* Wordmark — "Websmith." in Instrument Serif; the final period is cyan */
+.wordmark{font-family:var(--font-instrument-serif),serif;font-weight:400;line-height:1;white-space:nowrap;letter-spacing:-.01em}
+.wm-tone-ink{color:var(--ink)}
+.wm-tone-ivory{color:#F6F4EF}
+.wm-dot{color:var(--cyan)}
+.wm-inline{font-size:28px}
+.wm-display{font-size:44px}
 nav .links{display:flex;gap:30px;align-items:center}
 nav .links a{color:var(--ink);text-decoration:none;font-size:15px;opacity:.75;transition:opacity .2s}
 nav .links a:hover{opacity:1}
@@ -59,7 +50,7 @@ h1{font-weight:600;font-size:clamp(34px,4.5vw,60px);line-height:1.15;letter-spac
 .h-ctas{margin-top:34px;display:flex;gap:26px;align-items:center;border-top:1px solid rgba(20,20,22,.14);padding-top:34px;flex-wrap:wrap}
 .btn{background:var(--ink);color:var(--bg);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s}
 .btn:hover{background:#2A2A2C}
-.tlink{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--beige);padding-bottom:2px;transition:border-color .2s}
+.tlink{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--cyan);padding-bottom:2px;transition:border-color .2s}
 .tlink:hover{border-color:var(--ink)}
 
 /* ---------- SECTIONS ---------- */
@@ -97,7 +88,7 @@ section .wrap{position:relative}
 .svc{border-top:1px solid rgba(20,20,22,.2);padding-top:26px}
 .svc h3{font-weight:600;font-size:22px;letter-spacing:-.01em;margin-bottom:12px}
 .svc p{color:var(--body);font-size:16px;margin-bottom:20px}
-.svc a{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--beige);padding-bottom:2px;transition:border-color .2s}
+.svc a{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;border-bottom:1px solid var(--cyan);padding-bottom:2px;transition:border-color .2s}
 .svc a:hover{border-color:var(--ink)}
 
 /* ---------- PROCESS ---------- */
@@ -122,11 +113,12 @@ footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;ma
 .f-logo{margin-bottom:34px}
 .f-title{font-weight:600;font-size:clamp(30px,4vw,52px);letter-spacing:-.02em;margin-bottom:18px;color:#F6F4EF}
 .f-sub{color:#A5A199;font-size:17px;margin-bottom:40px;max-width:440px}
-.btn-wa{display:inline-block;background:var(--beige);color:var(--ink);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s}
-.btn-wa:hover{background:#A99F8C}
+.btn-wa{display:inline-block;background:var(--cyan);color:var(--ink);text-decoration:none;padding:16px 30px;border-radius:100px;font-size:15px;font-weight:500;transition:background .2s}
+.btn-wa:hover{background:var(--cyan-deep)}
 .f-meta{margin-top:90px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#8A867D;font-size:13px;border-top:1px solid rgba(246,244,239,.16);padding-top:26px}
-.f-link{color:#8A867D;text-decoration:none;border-bottom:1px solid rgba(184,175,158,.45);padding-bottom:1px;transition:color .2s,border-color .2s}
-.f-link:hover{color:#F6F4EF;border-color:#F6F4EF}
+.f-link{color:#8A867D;text-decoration:none;border-bottom:1px solid rgba(0,181,200,.5);padding-bottom:1px;transition:color .2s,border-color .2s}
+.f-link:hover{color:#F6F4EF;border-color:var(--cyan)}
+.f-legal{margin-top:22px;color:#6E6A63;font-size:12px}
 
 /* ---------- LEGAL / PRIVACY ---------- */
 .legal-page{padding:118px 0 130px}

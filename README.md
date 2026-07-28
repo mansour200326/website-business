@@ -1,9 +1,9 @@
-# Independent Web Studio — Dubai
+# Websmith — Independent Web Studio, Dubai
 
-A single-page portfolio/services site for an independent web design studio in
-Dubai. Built with **Next.js 14 (App Router) + TypeScript**, porting the approved
-design in `studio-minimal-ivory-v3.html` — a modern-minimal, ivory / ink /
-beige layout: Archivo (normal width, sentence case) + Space Mono for tiny
+A single-page portfolio/services site for **Websmith**, an independent web
+design studio in Dubai (a Web Smith FZCO company). Built with **Next.js 14
+(App Router) + TypeScript** — a modern-minimal, ivory / ink layout with a
+single cyan accent: Archivo (normal width, sentence case) + Space Mono for tiny
 labels, a hairline structure system, real screenshots inside rounded work
 cards, and restrained motion (fade-rise reveals + a slow screenshot hover pan).
 
@@ -70,33 +70,39 @@ that file.
 app/
   layout.tsx        # metadata, OpenGraph, favicon/app icons, theme-color, fonts
   page.tsx          # composes the single-page site
-  globals.css       # global stylesheet (ivory / ink / beige, hairline system)
-  fonts.ts          # Archivo + Space Mono (body); Instrument Serif + Manrope (logotype)
+  globals.css       # global stylesheet (ivory / ink + cyan accent, hairline system)
+  fonts.ts          # Archivo + Space Mono (body); Instrument Serif (wordmark)
 components/          # Nav, Hero, Work, WorkScene, Services, Process,
                      # Bilingual, Footer, Reveals, Logo
 config/site.ts      # ← single source of truth
 lib/whatsapp.ts     # builds wa.me links from the config
 lib/workShots.ts    # resolves each work screenshot (.png then .jpeg)
-public/favicon.svg  # favicon — Instrument Serif italic "a", ink on ivory
+public/favicon.svg  # favicon — Instrument Serif "W" (ink) + cyan period, on ivory
 public/icon-32|180|512.png   # PNG icon fallbacks (favicon / apple-touch / large)
 public/og.png       # 1200×630 OpenGraph image (static asset)
 public/work/        # project screenshots (see public/work/README.md)
 ```
 
-## The logotype
+## The wordmark
 
-"Atelier Digital" renders as a typographic lockup (see `components/Logo.tsx`):
-"atelier" in **Instrument Serif** italic over/before "digital" in **Manrope**
-medium, both lowercase. The nav uses the one-line `inline` variant (ink); the
-footer uses the two-line `stacked` variant (ivory on the ink band). Instrument
-Serif and Manrope are loaded via `next/font` and used **only** in the logotype
-and favicon — body and headings stay Archivo. `config/site.ts` keeps
-`studioName: "Atelier Digital"` for the `<title>` and metadata.
+"Websmith." renders as a wordmark (see `components/Logo.tsx`): "Websmith" in
+**Instrument Serif** with the final period in cyan (`#00B5C8`). The nav uses the
+`inline` variant (ink word); the footer uses the larger `display` variant (ivory
+word on the ink band). The period is always cyan. Instrument Serif is loaded via
+`next/font` and used **only** in the wordmark and favicon — body and headings
+stay Archivo. `config/site.ts` keeps `studioName: "Websmith"` for the `<title>`
+and metadata; the visual wordmark is rendered from the treatment, not the string.
+
+## Colour
+
+Ivory background (`#F6F4EF`) and ink text (`#141416`) throughout, with a single
+cyan accent (`#00B5C8`) used sparingly — the wordmark period, link underlines,
+and the footer WhatsApp button.
 
 ## Fonts, performance & accessibility
 
 - Fonts load through `next/font/google` (Archivo + Space Mono for the site;
-  Instrument Serif + Manrope for the logotype) — self-hosted, no layout shift.
+  Instrument Serif for the wordmark) — self-hosted, no layout shift.
 - Work screenshots use `next/image` with aspect-ratio containers, so images
   reserve space and there is no CLS.
 - Motion is CSS-first and minimal: gentle fade-and-rise scroll reveals and a
@@ -108,15 +114,15 @@ and favicon — body and headings stay Archivo. `config/site.ts` keeps
 
 ## Regenerating the OG image & icons
 
-`public/og.png` is a committed static asset: the stacked logotype centered on
-ivory with the tagline in Archivo beneath. It was rendered from the app's own
+`public/og.png` is a committed static asset: the "Websmith." wordmark centered
+on ivory with the tagline in Archivo beneath. It was rendered from the app's own
 components (self-hosted fonts) via a temporary `/og-preview` route screenshotted
 at 1200×630. To regenerate, recreate that preview page and capture it, or
 re-render an equivalent 1200×630 composition.
 
-`public/favicon.svg` is self-contained (the Instrument Serif italic "a" as a
-vector path, ink on ivory); the PNG fallbacks `icon-32.png`, `icon-180.png`, and
-`icon-512.png` are rasterized from it.
+`public/favicon.svg` is self-contained (the Instrument Serif "W" as a vector
+path in ink, with a cyan period, on ivory); the PNG fallbacks `icon-32.png`,
+`icon-180.png`, and `icon-512.png` are rasterized from it.
 
 ## Deploying on Vercel
 
