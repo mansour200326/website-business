@@ -91,25 +91,30 @@ public/og.png       # 1200×630 OpenGraph image
 
 All scroll choreography is GSAP + ScrollTrigger, set up in `components/Home.tsx`:
 
-- **Intro** — on first load (once per session, `sessionStorage`) the cyan dot
-  sweeps across the hero and the letters of *Websmith* rise behind it, the dot
-  settling as the period with a slight overshoot. Any click / tap / scroll /
-  keypress skips instantly to the finished state.
-- **The travelling dot** — one `position:fixed` element that animates between
-  docking anchors: the hero period, an invisible anchor beside each section
-  title, and finally a reserved slot inside the WhatsApp CTA (which then plays a
-  single "breathe"). The static period in the wordmark is the no-JS / reduced
-  fallback.
+- **Intro** — on every page load the cyan dot sweeps across the hero and the
+  letters of *Websmith* rise behind it, the dot settling as the period with a
+  slight overshoot. Any click / tap / scroll / keypress skips instantly to the
+  finished state.
+- **The travelling dot** — one `position:fixed` element moved with
+  `transform: translate3d` only (never top/left). A continuous
+  `requestAnimationFrame` lerp glides it toward its current target anchor — the
+  hero period, an invisible anchor beside each section title, and finally a
+  reserved slot inside the WhatsApp CTA (which then plays a single "breathe") —
+  so it flows smoothly through momentum scrolling with no snapping. The static
+  period in the wordmark is the no-JS / reduced fallback.
 - **Kinetic type** — section headlines split into words and rise-and-settle on
   scroll; body text fades up; a huge Instrument Serif *Websmith* watermark drifts
-  behind alternating sections at 4% opacity.
+  behind alternating sections at 4% opacity (the drift is desktop-only — on
+  mobile it stays static for performance).
 - **Portfolio** — exactly three projects (Sumou Jet, Grailhaus, Maison Padel),
   each a full-viewport moment with tight spacing so the next peeks as one ends.
-  A browser-framed screenshot scrolls **internally** (an `object-position`
-  reveal) so a tall full-page capture unspools top-to-bottom as you pass, and
-  the background tints toward the project's palette at very low saturation,
-  returning to ivory between. Drop full-page captures into `/public/portfolio/`
-  (see its README for the exact filenames).
+  A browser-framed **screen recording** of the real site (its opening animation +
+  a short scroll) plays inside the frame, and the background tints toward the
+  project's palette at very low saturation, returning to ivory between. The clips
+  are web-optimised (WebM + MP4, desktop + mobile sizes, muted, audio stripped),
+  lazy-loaded and played only while on screen via an `IntersectionObserver`, with
+  a poster still until playback. Drop new recordings into `/public/portfolio/`
+  (see its README for exact filenames and the ffmpeg recipe).
 - **Micro-interactions** — magnetic hover on primary buttons (desktop only),
   a cyan underline sweep on text links, 2px card lift.
 
@@ -125,12 +130,16 @@ project names and the watermark; Manrope handles all UI text.
 
 - Fonts via `next/font/google` (self-hosted); the serif is preloaded (it is
   above the fold in the hero).
-- Portfolio images use `next/image` — optimised, lazy-loaded below the fold,
-  with intrinsic sizes read at build time so there is no layout shift. The hero
-  reserves its space, so the intro causes no CLS.
+- Portfolio clips are web-optimised (WebM + MP4, desktop + mobile sizes, muted
+  and audio-stripped, desktop under 2.5 MB / mobile under 1 MB) and
+  `preload="none"`. An `IntersectionObserver` lazy-loads the right size/codec and
+  plays/pauses on scroll, so nothing downloads until the visitor approaches the
+  portfolio and initial paint is never blocked. The frame's aspect-ratio comes
+  from the poster's intrinsic size, so there is no layout shift; the hero reserves
+  its space, so the intro causes no CLS.
 - `prefers-reduced-motion` is respected end-to-end: every reveal renders
-  instantly, the intro is skipped, and the dot stays static as the wordmark
-  period.
+  instantly, the intro is skipped, the dot stays static as the wordmark period,
+  and portfolio clips never autoload or autoplay — their poster still is shown.
 - Responsive down to 375px with no horizontal scroll; the dot's docking
   positions are tested at 390px. `/privacy` and secondary pages are normal
   vertical pages.
