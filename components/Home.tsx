@@ -1,11 +1,10 @@
 "use client";
 
 import { useLayoutEffect, useEffect, useRef } from "react";
-import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { site } from "@/config/site";
-import type { PortfolioImage } from "@/lib/portfolio";
+import type { PortfolioMedia } from "@/lib/portfolio";
 import { waLink } from "@/lib/whatsapp";
 import Nav from "./Nav";
 import Footer from "./Footer";
@@ -25,7 +24,7 @@ function Kinetic({ text, className }: { text: string; className?: string }) {
   );
 }
 
-export default function Home({ images }: { images: Record<string, PortfolioImage> }) {
+export default function Home({ media }: { media: Record<string, PortfolioMedia> }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
 
@@ -92,22 +91,23 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
           onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }),
         });
       });
-      // Internal full-page reveal — a GPU translate (never object-position) walks
-      // the framed screenshot from its top to its bottom as the project passes.
-      // For a tall full-page capture this reveals the whole page.
-      gsap.utils.toArray<HTMLElement>(".pf-img").forEach((img) => {
-        const view = img.closest<HTMLElement>(".pf-view")!;
-        gsap.fromTo(
-          img,
-          { y: 0 },
-          {
-            y: () => Math.min(0, -(img.offsetHeight - view.offsetHeight)),
-            ease: "none",
-            force3D: true,
-            scrollTrigger: { trigger: view, start: "top bottom", end: "bottom top", scrub: true, invalidateOnRefresh: true },
-          }
-        );
-      });
+      // Parallax frame treatment — the browser-framed clip drifts a few percent
+      // as the project passes (transform only, force3D). Desktop-only: on mobile
+      // the frame stays put so the video is the only thing moving (performance).
+      if (!isMobile) {
+        gsap.utils.toArray<HTMLElement>(".pf-frame").forEach((frame) => {
+          gsap.fromTo(
+            frame,
+            { yPercent: -4 },
+            {
+              yPercent: 4,
+              ease: "none",
+              force3D: true,
+              scrollTrigger: { trigger: frame.closest(".pf"), start: "top bottom", end: "bottom top", scrub: true },
+            }
+          );
+        });
+      }
       // Ghost watermark parallax — desktop only (static on mobile).
       if (!isMobile) {
         gsap.utils.toArray<HTMLElement>(".watermark").forEach((w) => {
@@ -208,13 +208,12 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
       const removeSkip = () => evts.forEach((e) => window.removeEventListener(e, skip));
       evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
 
-      // ---- recalc anchor positions on resize and after images load ----
+      // ---- recalc anchor positions on resize and after the page settles ----
+      // The frames reserve their space via a fixed aspect-ratio (no CLS), so a
+      // resize + a post-load refresh keep every dock anchor accurate.
       const refresh = () => ScrollTrigger.refresh();
       window.addEventListener("resize", refresh, { passive: true });
       window.addEventListener("load", refresh, { once: true });
-      gsap.utils.toArray<HTMLImageElement>(".pf-img").forEach((im) => {
-        if (!im.complete) im.addEventListener("load", refresh, { once: true });
-      });
 
       return () => {
         cancelAnimationFrame(rafId);
@@ -222,6 +221,44 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
         removeSkip();
       };
     }, rootRef);
+
+    // ---- portfolio videos: lazy-load + play on scroll (IntersectionObserver) ----
+    // Nothing is fetched until the visitor approaches (preload="none" + src set
+    // only on approach). The correct size (mobile/desktop) and codec (webm/mp4)
+    // are chosen in JS; the poster shows until the first frame is ready and stays
+    // put if a source fails. This block is skipped entirely under reduced motion
+    // (the effect returns early above), so those visitors just see the poster.
+    const mqMobile = window.matchMedia("(max-width: 820px)");
+    const videos = Array.from(rootRef.current?.querySelectorAll<HTMLVideoElement>("video.pf-video") ?? []);
+    const pickSrc = (v: HTMLVideoElement) => {
+      const size = mqMobile.matches ? "mobile" : "desktop";
+      const canWebm = v.canPlayType('video/webm; codecs="vp9"') !== "";
+      return v.dataset[canWebm ? `${size}Webm` : `${size}Mp4`] || "";
+    };
+    let io: IntersectionObserver | null = null;
+    if (videos.length && "IntersectionObserver" in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const v = e.target as HTMLVideoElement;
+            if (e.isIntersecting) {
+              if (!v.src) {
+                const src = pickSrc(v);
+                if (src) {
+                  v.src = src;
+                  v.load();
+                }
+              }
+              v.play().catch(() => {}); // muted autoplay; ignore rejections
+            } else if (v.src) {
+              v.pause();
+            }
+          }
+        },
+        { rootMargin: "300px 0px", threshold: 0.2 } // start loading just before it enters
+      );
+      videos.forEach((v) => io!.observe(v));
+    }
 
     // ---- magnetic buttons (desktop, fine pointer) ----
     const fine = window.matchMedia("(pointer:fine)").matches;
@@ -244,6 +281,7 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
 
     return () => {
       ctx.revert();
+      io?.disconnect();
       magnets.forEach((fn) => fn());
       document.body.classList.remove("dot-live");
     };
@@ -288,7 +326,8 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
         {/* PORTFOLIO */}
         <div id="work">
           {portfolio.map((p, i) => {
-            const img = images[p.slug];
+            const m = media[p.slug];
+            const ratio = m?.has ? `${m.width} / ${m.height}` : "1400 / 670";
             return (
               <section className="pf" data-tint={p.tint} key={p.slug}>
                 <div className="wrap pf-grid">
@@ -309,19 +348,30 @@ export default function Home({ images }: { images: Record<string, PortfolioImage
                       <i />
                       <i />
                     </div>
-                    <div className="pf-view">
-                      {img?.has ? (
-                        <Image
-                          className="pf-img"
-                          src={img.src}
-                          alt={`${p.name} — website`}
-                          width={img.width}
-                          height={img.height}
-                          sizes="(max-width: 820px) 92vw, 560px"
-                          loading="lazy"
+                    {/* The poster (a still frame of the real site) shows until the
+                        IntersectionObserver lazy-loads and plays the video on
+                        approach; it also stays put under reduced motion or if a
+                        source fails. Sizes/ratio are fixed so there is no CLS. */}
+                    <div className="pf-view" style={{ aspectRatio: ratio }}>
+                      {m?.video ? (
+                        <video
+                          className="pf-video"
+                          poster={m.poster}
+                          muted
+                          loop
+                          playsInline
+                          preload="none"
+                          aria-label={`${p.name} — website preview`}
+                          data-desktop-webm={m.video.desktopWebm}
+                          data-desktop-mp4={m.video.desktopMp4}
+                          data-mobile-webm={m.video.mobileWebm}
+                          data-mobile-mp4={m.video.mobileMp4}
                         />
+                      ) : m?.has ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="pf-video" src={m.poster} alt={`${p.name} — website`} loading="lazy" />
                       ) : (
-                        <div className="pf-img" style={{ background: p.tint }} />
+                        <div className="pf-video" style={{ background: p.tint }} />
                       )}
                     </div>
                   </div>

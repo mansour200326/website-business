@@ -1,40 +1,49 @@
-# Portfolio screenshots
+# Portfolio media
 
-Exactly three projects. Each shows a screenshot inside a browser frame that
-scrolls **internally** as the visitor passes — for a tall full-page capture this
-reveals the whole page top-to-bottom.
+Exactly three projects. Each portfolio moment plays a short **screen recording**
+of the real site (its opening animation + a scroll) inside a browser frame. The
+clip is lazy-loaded and plays only while the section is on screen; a poster still
+shows until it plays and stays as the fallback.
 
-## Exact files — drop full-page captures here (`/public/portfolio/`)
+## Files per project (`/public/portfolio/`)
 
-| Project      | Live site        | File (any of `.webp` / `.jpg` / `.jpeg` / `.png`) | Status                          |
-| ------------ | ---------------- | ------------------------------------------------- | ------------------------------- |
-| Sumou Jet    | sumoujet.com     | `sumou-jet.webp`                                  | interim (single-viewport) — replace |
-| Grailhaus    | grailhaus.com    | `grailhaus.webp`                                  | interim (single-viewport) — replace |
-| Maison Padel | maisonpadel.ae   | `maison-padel.webp`                               | interim (single-viewport) — replace |
+For each `slug` (`sumou-jet`, `grailhaus`, `maison-padel`):
 
-**Please replace each with a full-page screenshot** — the entire scrollable
-page, top to bottom (e.g. a browser "capture full page" export, ~1440px wide and
-as tall as the page). The frame is already sized for tall images: it crops to a
-browser-window shape and the image is walked from its top to its bottom by a GPU
-`transform` (never `object-position`, which repaints) as the project scrolls
-past. The current interim images are single-viewport captures of each site, so
-they fill the frame but there is little to reveal until the full-page versions
-are dropped in.
+| File                      | What it is                                            |
+| ------------------------- | ----------------------------------------------------- |
+| `${slug}-poster.webp`     | poster still (also the reduced-motion / fallback image) |
+| `${slug}-desktop.webm`    | VP9 desktop clip (~1400px wide)                       |
+| `${slug}-desktop.mp4`     | H.264 desktop clip (~1400px wide)                     |
+| `${slug}-mobile.webm`     | VP9 mobile clip (~700px wide)                         |
+| `${slug}-mobile.mp4`      | H.264 mobile clip (~700px wide)                       |
 
-**Compress before committing.** Save as **WebP** (quality ~78) and cap the width
-at ~1600px — the display slot is only 560px wide, so a raw 2700px+ capture is
-pure lag on mobile. The interim files here were converted this way (each is
-14–45 KB, down from 0.2–3.7 MB). A quick one-liner with the `sharp` npm package:
+All clips are **muted with the audio track stripped**. Desktop variants stay
+under 2.5 MB, mobile under 1 MB. The frame's aspect-ratio is set from the poster's
+intrinsic size, so there is no layout shift.
+
+## Regenerating from a screen recording
+
+Given a source recording `in.mov`, produce every output with `ffmpeg` (two-pass;
+pick a target bitrate that keeps the longest clip under budget), strip audio with
+`-an`, drop to 30 fps, and add `-movflags +faststart` to the MP4s:
 
 ```bash
-npx --yes -p sharp node -e 'require("sharp")("in.png").resize({width:1600,withoutEnlargement:true}).webp({quality:78}).toFile("sumou-jet.webp")'
+# desktop MP4 (H.264) — repeat pass 1/2; WebM uses -c:v libvpx-vp9
+ffmpeg -i in.mov -an -c:v libx264 -profile:v high -pix_fmt yuv420p \
+  -vf "scale=1400:-2:flags=lanczos,fps=30" -b:v 600k -preset medium \
+  -movflags +faststart sumou-jet-desktop.mp4
+# mobile: scale=700:-2 and a lower bitrate (~250k)
+# poster: a clean frame from the settled site
+ffmpeg -ss 8 -i in.mov -frames:v 1 -vf "scale=1400:-2" -c:v libwebp -quality 82 \
+  sumou-jet-poster.webp
 ```
 
 ## Notes
 
-- Filenames are driven by each project's `slug` in `config/site.ts` (resolved
-  `.webp → .jpg → .jpeg → .png`). To change projects, edit the `portfolio` array.
-- Images are served through `next/image` — it emits a responsive `srcset` and a
-  mobile-sized variant automatically, lazy-loaded below the fold, with intrinsic
-  sizes read at build time so there is no layout shift.
-- If a file is missing, the frame falls back to a clean tinted panel.
+- Slugs are driven by each project's `slug` in `config/site.ts`. `lib/portfolio.ts`
+  (`portfolioMedia`) resolves the poster + the four video files at build time.
+- The video is wired with `preload="none"`, `muted`, `playsinline`, `loop`. An
+  `IntersectionObserver` picks the mobile/desktop size and webm/mp4 codec in JS,
+  sets the source only as the visitor approaches, and plays/pauses on scroll.
+- If the video files are missing but a poster exists, the frame shows the poster
+  still; if nothing exists, it falls back to a clean tinted panel.

@@ -1,10 +1,11 @@
 import Home from "@/components/Home";
 import { site } from "@/config/site";
-import { portfolioImage, type PortfolioImage } from "@/lib/portfolio";
+import { portfolioMedia, type PortfolioMedia } from "@/lib/portfolio";
 
 export default function Page() {
-  // Resolve portfolio screenshots (with intrinsic sizes) at build time — no CLS.
-  const images: Record<string, PortfolioImage> = {};
-  for (const p of site.portfolio) images[p.slug] = portfolioImage(p.slug);
-  return <Home images={images} />;
+  // Resolve portfolio motion assets (poster still + video sources, with the
+  // poster's intrinsic size) at build time — no CLS.
+  const media: Record<string, PortfolioMedia> = {};
+  for (const p of site.portfolio) media[p.slug] = portfolioMedia(p.slug);
+  return <Home media={media} />;
 }

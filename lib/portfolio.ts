@@ -10,9 +10,27 @@ export interface PortfolioImage {
   height: number;
 }
 
+/** A portfolio moment: a poster still plus optional web-optimised video sources. */
+export interface PortfolioMedia {
+  slug: string;
+  /** true when a poster image exists (the reduced-motion / fallback still) */
+  has: boolean;
+  poster: string;
+  /** poster intrinsic size — sets the frame's aspect-ratio so there is no CLS */
+  width: number;
+  height: number;
+  /** video sources by size + codec; null when no video files are present */
+  video: {
+    desktopWebm: string;
+    desktopMp4: string;
+    mobileWebm: string;
+    mobileMp4: string;
+  } | null;
+}
+
 const DIR = path.join(process.cwd(), "public", "portfolio");
 const EXTENSIONS = ["webp", "jpg", "jpeg", "png"] as const;
-const DEFAULT = { width: 1600, height: 2000 };
+const DEFAULT = { width: 1400, height: 670 };
 
 /** Read PNG/JPEG/WebP intrinsic dimensions from the file header — no dependencies. */
 function imageSize(file: string): { width: number; height: number } | null {
@@ -61,4 +79,42 @@ export function portfolioImage(slug: string): PortfolioImage {
     }
   }
   return { slug, has: false, src: "", ...DEFAULT };
+}
+
+/**
+ * Resolve a project's motion assets: the `${slug}-poster.webp` still and, when
+ * all four exist, the desktop/mobile × webm/mp4 video sources. Existence is
+ * checked at build time; the poster's intrinsic size drives the frame ratio so
+ * the lazy-loaded video causes no layout shift.
+ */
+export function portfolioMedia(slug: string): PortfolioMedia {
+  const posterFile = `${slug}-poster.webp`;
+  const posterAbs = path.join(DIR, posterFile);
+  const hasPoster = fs.existsSync(posterAbs);
+  const size = hasPoster ? imageSize(posterAbs) ?? DEFAULT : DEFAULT;
+
+  const v = {
+    desktopWebm: `${slug}-desktop.webm`,
+    desktopMp4: `${slug}-desktop.mp4`,
+    mobileWebm: `${slug}-mobile.webm`,
+    mobileMp4: `${slug}-mobile.mp4`,
+  };
+  const hasVideo = Object.values(v).every((f) => fs.existsSync(path.join(DIR, f)));
+  const video = hasVideo
+    ? {
+        desktopWebm: `/portfolio/${v.desktopWebm}`,
+        desktopMp4: `/portfolio/${v.desktopMp4}`,
+        mobileWebm: `/portfolio/${v.mobileWebm}`,
+        mobileMp4: `/portfolio/${v.mobileMp4}`,
+      }
+    : null;
+
+  return {
+    slug,
+    has: hasPoster,
+    poster: hasPoster ? `/portfolio/${posterFile}` : "",
+    width: size.width,
+    height: size.height,
+    video,
+  };
 }
