@@ -1,7 +1,7 @@
 /**
  * The Websmith wordmark — "Websmith." set in Instrument Serif, ink (or ivory on
- * the dark footer band), with the final period in cyan. Used ONLY in the
- * logotype and favicon; the rest of the site is Archivo.
+ * the dark footer band), with the final period in cyan. Instrument Serif is
+ * used only for the wordmark, project names and the watermark; UI text is Manrope.
  *
  *  - variant "inline"  → nav size.
  *  - variant "display" → larger, for the footer / OG.

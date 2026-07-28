@@ -1,23 +1,10 @@
-import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
-import Work from "@/components/Work";
-import Services from "@/components/Services";
-import Process from "@/components/Process";
-import Bilingual from "@/components/Bilingual";
-import Footer from "@/components/Footer";
-import Reveals from "@/components/Reveals";
+import Home from "@/components/Home";
+import { site } from "@/config/site";
+import { portfolioImage, type PortfolioImage } from "@/lib/portfolio";
 
-export default function Home() {
-  return (
-    <>
-      <Nav />
-      <Hero />
-      <Work />
-      <Services />
-      <Process />
-      <Bilingual />
-      <Footer />
-      <Reveals />
-    </>
-  );
+export default function Page() {
+  // Resolve portfolio screenshots (with intrinsic sizes) at build time — no CLS.
+  const images: Record<string, PortfolioImage> = {};
+  for (const p of site.portfolio) images[p.slug] = portfolioImage(p.slug);
+  return <Home images={images} />;
 }

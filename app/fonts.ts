@@ -1,31 +1,21 @@
-import { Archivo, Space_Mono, Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Manrope } from "next/font/google";
 
 /**
- * Archivo — variable font at normal width. Used for headings and body at
- * weights 500–600 (sentence case). The width axis is intentionally not loaded;
- * the design uses normal-width Archivo only.
- */
-export const archivo = Archivo({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-archivo",
-});
-
-/** Space Mono — reserved for tiny labels and index numbers (weight 400 only). */
-export const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-  variable: "--font-space-mono",
-});
-
-/**
- * Instrument Serif (regular, 400) — used ONLY for the "Websmith." wordmark
- * (and the favicon). Not for body or headings.
+ * Instrument Serif (regular, 400) — the display/brand serif: the "Websmith."
+ * wordmark, oversized project names, and the ghost watermark. Preloaded (it is
+ * used above the fold in the hero).
  */
 export const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   display: "swap",
-  variable: "--font-instrument-serif",
+  preload: true,
+  variable: "--font-serif",
+});
+
+/** Manrope — all UI text (nav, body, buttons, labels, headlines). Variable. */
+export const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
 });

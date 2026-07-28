@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { archivo, spaceMono, instrumentSerif } from "./fonts";
+import { manrope, instrumentSerif } from "./fonts";
 import { site } from "@/config/site";
 import "./globals.css";
 
@@ -57,17 +57,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        {/* Without JS the scroll-reveal elements would stay hidden — show them. */}
-        <noscript>
-          <style>{`.rv{opacity:1 !important;transform:none !important}`}</style>
-        </noscript>
-      </head>
-      <body
-        className={`${archivo.variable} ${spaceMono.variable} ${instrumentSerif.variable}`}
-      >
-        {children}
-      </body>
+      <body className={`${manrope.variable} ${instrumentSerif.variable}`}>{children}</body>
     </html>
   );
 }

@@ -2,10 +2,12 @@
 
 A single-page portfolio/services site for **Websmith**, an independent web
 design studio in Dubai (a Web Smith FZCO company). Built with **Next.js 14
-(App Router) + TypeScript** — a modern-minimal, ivory / ink layout with a
-single cyan accent: Archivo (normal width, sentence case) + Space Mono for tiny
-labels, a hairline structure system, real screenshots inside rounded work
-cards, and restrained motion (fade-rise reveals + a slow screenshot hover pan).
+(App Router) + TypeScript** and **GSAP + ScrollTrigger** — "The Living Period":
+the cyan dot from the "Websmith." wordmark writes the name on first load, then
+travels down the page as you scroll, docking beside each section title and
+finally landing in the WhatsApp CTA. Ivory / ink with a single cyan accent;
+Instrument Serif for the wordmark, project names and the ghost watermark;
+Manrope for all UI text. Normal vertical scrolling — the wheel is never hijacked.
 
 ## Getting started
 
@@ -69,48 +71,65 @@ that file.
 ```
 app/
   layout.tsx        # metadata, OpenGraph, favicon/app icons, theme-color, fonts
-  page.tsx          # composes the single-page site
-  globals.css       # global stylesheet (ivory / ink + cyan accent, hairline system)
-  fonts.ts          # Archivo + Space Mono (body); Instrument Serif (wordmark)
-components/          # Nav, Hero, Work, WorkScene, Services, Process,
-                     # Bilingual, Footer, Reveals, Logo
-config/site.ts      # ← single source of truth
+  page.tsx          # resolves portfolio images (server) → <Home/>
+  globals.css       # global stylesheet (ivory / ink + cyan accent)
+  fonts.ts          # Instrument Serif (wordmark/display) + Manrope (UI), via next/font
+  privacy/page.tsx  # /privacy — a normal vertical page
+components/
+  Home.tsx          # the homepage: all sections + GSAP/ScrollTrigger choreography
+  Nav.tsx  Footer.tsx  Logo.tsx
+config/site.ts      # ← single source of truth (hero, portfolio, packages, about, close)
 lib/whatsapp.ts     # builds wa.me links from the config
-lib/workShots.ts    # resolves each work screenshot (.png then .jpeg)
+lib/portfolio.ts    # resolves each portfolio screenshot (.jpg/.jpeg/.png) + intrinsic size
+public/portfolio/   # project screenshots (see public/portfolio/README.md)
 public/favicon.svg  # favicon — Instrument Serif "W" (ink) + cyan period, on ivory
-public/icon-32|180|512.png   # PNG icon fallbacks (favicon / apple-touch / large)
-public/og.png       # 1200×630 OpenGraph image (static asset)
-public/work/        # project screenshots (see public/work/README.md)
+public/icon-32|180|512.png   # PNG icon fallbacks
+public/og.png       # 1200×630 OpenGraph image
 ```
 
-## The wordmark
+## Motion ("The Living Period")
 
-"Websmith." renders as a wordmark (see `components/Logo.tsx`): "Websmith" in
-**Instrument Serif** with the final period in cyan (`#00B5C8`). The nav uses the
-`inline` variant (ink word); the footer uses the larger `display` variant (ivory
-word on the ink band). The period is always cyan. Instrument Serif is loaded via
-`next/font` and used **only** in the wordmark and favicon — body and headings
-stay Archivo. `config/site.ts` keeps `studioName: "Websmith"` for the `<title>`
-and metadata; the visual wordmark is rendered from the treatment, not the string.
+All scroll choreography is GSAP + ScrollTrigger, set up in `components/Home.tsx`:
 
-## Colour
+- **Intro** — on first load (once per session, `sessionStorage`) the cyan dot
+  sweeps across the hero and the letters of *Websmith* rise behind it, the dot
+  settling as the period with a slight overshoot. Any click / tap / scroll /
+  keypress skips instantly to the finished state.
+- **The travelling dot** — one `position:fixed` element that animates between
+  docking anchors: the hero period, an invisible anchor beside each section
+  title, and finally a reserved slot inside the WhatsApp CTA (which then plays a
+  single "breathe"). The static period in the wordmark is the no-JS / reduced
+  fallback.
+- **Kinetic type** — section headlines split into words and rise-and-settle on
+  scroll; body text fades up; a huge Instrument Serif *Websmith* watermark drifts
+  behind alternating sections at 4% opacity.
+- **Portfolio** — each project is a full-viewport moment; its browser-framed
+  screenshot parallax-scrolls inside the frame, and the background tints toward
+  the project's palette at very low saturation, returning to ivory between.
+- **Micro-interactions** — magnetic hover on primary buttons (desktop only),
+  a cyan underline sweep on text links, 2px card lift.
 
-Ivory background (`#F6F4EF`) and ink text (`#141416`) throughout, with a single
-cyan accent (`#00B5C8`) used sparingly — the wordmark period, link underlines,
-and the footer WhatsApp button.
+Scrolling is always native — the wheel is never hijacked.
 
-## Fonts, performance & accessibility
+## Colour & type
 
-- Fonts load through `next/font/google` (Archivo + Space Mono for the site;
-  Instrument Serif for the wordmark) — self-hosted, no layout shift.
-- Work screenshots use `next/image` with aspect-ratio containers, so images
-  reserve space and there is no CLS.
-- Motion is CSS-first and minimal: gentle fade-and-rise scroll reveals and a
-  slow hover pan on the work screenshots; the page is statically prerendered.
-- `prefers-reduced-motion` is respected end-to-end: reveals show instantly and
-  the screenshot pan is disabled.
-- Responsive down to 375px with no horizontal scroll; the work cards stack on
-  mobile.
+Ivory (`#F6F4EF`) background, ink (`#141416`) text, and a single cyan accent
+(`#00B5C8`) used sparingly. Instrument Serif appears only in the wordmark,
+project names and the watermark; Manrope handles all UI text.
+
+## Performance & accessibility
+
+- Fonts via `next/font/google` (self-hosted); the serif is preloaded (it is
+  above the fold in the hero).
+- Portfolio images use `next/image` — optimised, lazy-loaded below the fold,
+  with intrinsic sizes read at build time so there is no layout shift. The hero
+  reserves its space, so the intro causes no CLS.
+- `prefers-reduced-motion` is respected end-to-end: every reveal renders
+  instantly, the intro is skipped, and the dot stays static as the wordmark
+  period.
+- Responsive down to 375px with no horizontal scroll; the dot's docking
+  positions are tested at 390px. `/privacy` and secondary pages are normal
+  vertical pages.
 
 ## Regenerating the OG image & icons
 
