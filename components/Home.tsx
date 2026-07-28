@@ -32,291 +32,320 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return; // CSS renders everything final; dot hidden, static period shown
 
-    const root = rootRef.current!;
+    gsap.registerPlugin(ScrollTrigger);
     const dot = dotRef.current!;
     const isMobile = window.matchMedia("(max-width: 820px)").matches;
     document.body.classList.add("dot-live"); // hide the static period; the travelling dot takes over
 
-    // ---- pre-paint (cheap, synchronous): hide the hero letters and park the dot
-    // so the very first paint shows a settled frame with no flash. No GSAP yet —
-    // all heavy setup is deferred one frame so it never delays first paint. ----
-    const letters = Array.from(root.querySelectorAll<HTMLElement>(".hm-l"));
-    letters.forEach((l) => {
-      l.style.transform = "translateY(125%)";
-      l.style.opacity = "0";
-    });
-    const heroSlot = root.querySelector<HTMLElement>('[data-dot-anchor="hero"]')!;
-    const mark = root.querySelector<HTMLElement>(".hero-mark")!;
-    const dotSize = () => dot.offsetWidth || 14;
+    const ctx = gsap.context(() => {
+      const heroSlot = document.querySelector<HTMLElement>('[data-dot-anchor="hero"]')!;
+      const dotSize = () => dot.offsetWidth || 14;
+      const posOf = (el: HTMLElement) => {
+        const r = el.getBoundingClientRect();
+        const s = dotSize();
+        return { x: r.left + r.width / 2 - s / 2, y: r.top + r.height / 2 - s / 2 };
+      };
 
-    // Dot state in viewport coords. The lerp reads ONLY scrollY per frame (never
-    // getBoundingClientRect), so it costs no forced layout. Each anchor is
-    // measured to an absolute document Y once, when it becomes active/on-screen.
-    let cx = 0;
-    let cy = 0;
-    let targetX = 0; // viewport X (stable under vertical scroll)
-    let targetYAbs = 0; // document Y of the target's centre
-    const applyDot = () => {
-      dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
-    };
-    const measure = (el: HTMLElement) => {
-      const r = el.getBoundingClientRect();
-      const s = dotSize();
-      targetX = r.left + r.width / 2 - s / 2;
-      targetYAbs = r.top + window.scrollY + r.height / 2 - s / 2;
-    };
-    {
-      const mr = mark.getBoundingClientRect();
-      cx = mr.left - 30;
-      cy = mr.top + mr.height * 0.52 - dotSize() / 2;
-      applyDot();
-      dot.style.opacity = "1";
-    }
+      // ---- the dot: transforms only, continuous rAF lerp toward the active
+      // anchor (closes ~14% of the remaining distance each frame). This flows
+      // smoothly during momentum scrolling with no snapping — never top/left. ----
+      let active: HTMLElement = heroSlot;
+      let cx = 0;
+      let cy = 0;
+      let rafId = 0;
+      let ticking = false;
+      const applyDot = () => {
+        dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+      };
+      const tick = () => {
+        const p = posOf(active);
+        cx += (p.x - cx) * 0.14;
+        cy += (p.y - cy) * 0.14;
+        applyDot();
+        rafId = requestAnimationFrame(tick);
+      };
+      const startFollow = () => {
+        if (ticking) return;
+        ticking = true;
+        dot.style.opacity = "1";
+        rafId = requestAnimationFrame(tick);
+      };
 
-    let rafId = 0;
-    let ticking = false;
-    const tick = () => {
-      const ty = targetYAbs - window.scrollY; // cheap read, no layout flush
-      cx += (targetX - cx) * 0.14;
-      cy += (ty - cy) * 0.14;
-      applyDot();
-      rafId = requestAnimationFrame(tick);
-    };
-    const startFollow = () => {
-      if (ticking) return;
-      ticking = true;
-      rafId = requestAnimationFrame(tick);
-    };
-
-    // ---- heavy setup: runs one frame after first paint ----
-    let started = false;
-    let ctx: gsap.Context | null = null;
-    let io: IntersectionObserver | null = null;
-    const removers: Array<() => void> = [];
-
-    const start = () => {
-      if (started) return;
-      started = true;
-      gsap.registerPlugin(ScrollTrigger);
-
-      ctx = gsap.context(() => {
-        // Reveals — mobile collapses each split headline to ONE fade-up (no dozens
-        // of animated word spans); desktop keeps the word-by-word rise.
-        if (isMobile) {
-          gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
-            gsap.set(k, { y: 16, opacity: 0 });
-            ScrollTrigger.create({
-              trigger: k,
-              start: "top 88%",
-              once: true,
-              onEnter: () => gsap.to(k, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", force3D: true }),
-            });
-          });
-        } else {
-          gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
-            const words = k.querySelectorAll(".kin-word");
-            gsap.set(words, { yPercent: 115 });
-            ScrollTrigger.create({
-              trigger: k,
-              start: "top 78%",
-              once: true,
-              onEnter: () => gsap.to(words, { yPercent: 0, duration: 0.55, stagger: 0.08, ease: "power3.out", force3D: true }),
-            });
-          });
-        }
-        gsap.utils.toArray<HTMLElement>(".reveal-fade").forEach((el) => {
-          gsap.set(el, { y: 18, opacity: 0 });
+      // ---- reveals: transform + opacity only ----
+      // Mobile collapses each split headline to ONE fade-up (no dozens of animated
+      // word spans / compositor layers); desktop keeps the word-by-word rise.
+      if (isMobile) {
+        gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
+          gsap.set(k, { y: 16, opacity: 0 });
           ScrollTrigger.create({
-            trigger: el,
+            trigger: k,
             start: "top 88%",
             once: true,
-            onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }),
+            onEnter: () => gsap.to(k, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", force3D: true }),
           });
         });
-
-        // Scrubbed parallax (frame drift + watermark drift) is DESKTOP ONLY — no
-        // scrubbing ScrollTriggers run on mobile, where they cost the most.
-        if (!isMobile) {
-          gsap.utils.toArray<HTMLElement>(".pf-frame").forEach((frame) => {
-            gsap.fromTo(
-              frame,
-              { yPercent: -4 },
-              { yPercent: 4, ease: "none", force3D: true, scrollTrigger: { trigger: frame.closest(".pf"), start: "top bottom", end: "bottom top", scrub: true } }
-            );
-          });
-          gsap.utils.toArray<HTMLElement>(".watermark").forEach((w) => {
-            gsap.fromTo(
-              w,
-              { yPercent: -8 },
-              { yPercent: 8, ease: "none", force3D: true, scrollTrigger: { trigger: w.closest(".section, .pf"), start: "top bottom", end: "bottom top", scrub: true } }
-            );
-          });
-        }
-
-        const tintLayer = root.querySelector<HTMLElement>(".tint-layer")!;
-        gsap.utils.toArray<HTMLElement>("[data-tint]").forEach((sec) => {
-          const color = sec.getAttribute("data-tint")!;
-          const to = (c: string) => gsap.to(tintLayer, { backgroundColor: c, duration: 0.8, ease: "power1.out" });
+      } else {
+        gsap.utils.toArray<HTMLElement>(".kin").forEach((k) => {
+          const words = k.querySelectorAll(".kin-word");
+          gsap.set(words, { yPercent: 115 });
           ScrollTrigger.create({
-            trigger: sec,
-            start: "top 55%",
-            end: "bottom 45%",
-            onEnter: () => to(color),
-            onEnterBack: () => to(color),
-            onLeave: () => to("#F6F4EF"),
-            onLeaveBack: () => to("#F6F4EF"),
+            trigger: k,
+            start: "top 78%",
+            once: true,
+            onEnter: () => gsap.to(words, { yPercent: 0, duration: 0.55, stagger: 0.08, ease: "power3.out", force3D: true }),
           });
         });
+      }
+      gsap.utils.toArray<HTMLElement>(".reveal-fade").forEach((el) => {
+        gsap.set(el, { y: 18, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 85%",
+          once: true,
+          onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }),
+        });
+      });
+      // Parallax frame treatment — the browser-framed clip drifts a few percent
+      // as the project passes (transform only, force3D). Desktop-only: on mobile
+      // the frame stays put so the video is the only thing moving (performance).
+      if (!isMobile) {
+        gsap.utils.toArray<HTMLElement>(".pf-frame").forEach((frame) => {
+          gsap.fromTo(
+            frame,
+            { yPercent: -4 },
+            {
+              yPercent: 4,
+              ease: "none",
+              force3D: true,
+              scrollTrigger: { trigger: frame.closest(".pf"), start: "top bottom", end: "bottom top", scrub: true },
+            }
+          );
+        });
+      }
+      // Ghost watermark parallax — desktop only (static on mobile). GSAP OWNS the
+      // centering (xPercent/yPercent -50) and drifts a separate pixel axis, so it
+      // can never drop the translate(-50%,-50%) centering the way animating
+      // yPercent directly would — the word stays centred and faint behind content.
+      if (!isMobile) {
+        gsap.utils.toArray<HTMLElement>(".watermark").forEach((w) => {
+          gsap.set(w, { xPercent: -50, yPercent: -50 });
+          gsap.fromTo(
+            w,
+            { y: -36 },
+            {
+              y: 36,
+              ease: "none",
+              force3D: true,
+              scrollTrigger: { trigger: w.closest(".section, .pf"), start: "top bottom", end: "bottom top", scrub: true },
+            }
+          );
+        });
+      }
+      const tintLayer = document.querySelector<HTMLElement>(".tint-layer")!;
+      gsap.utils.toArray<HTMLElement>("[data-tint]").forEach((sec) => {
+        const color = sec.getAttribute("data-tint")!;
+        const to = (c: string) => gsap.to(tintLayer, { backgroundColor: c, duration: 0.8, ease: "power1.out" });
+        ScrollTrigger.create({
+          trigger: sec,
+          start: "top 55%",
+          end: "bottom 45%",
+          onEnter: () => to(color),
+          onEnterBack: () => to(color),
+          onLeave: () => to("#F6F4EF"),
+          onLeaveBack: () => to("#F6F4EF"),
+        });
+      });
 
-        // Dot docking — each anchor is measured only when it becomes active (i.e.
-        // on-screen), so cached positions stay correct even for content-visibility
-        // sections that hadn't been laid out yet.
-        let breathed = false;
-        const breathe = () => {
-          if (breathed) return;
-          breathed = true;
-          gsap.fromTo(".close-cta .btn", { scale: 1 }, { scale: 1.05, duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" });
-        };
-        const attachDotScroll = () => {
-          measure(heroSlot);
-          startFollow();
-          gsap.utils.toArray<HTMLElement>("[data-dot-anchor]").forEach((el) => {
-            const section = el.closest<HTMLElement>(".pf, .section, .hero, .close") || el;
-            const isClose = el.getAttribute("data-dot-anchor") === "close";
-            ScrollTrigger.create({
-              trigger: section,
-              start: "top 58%",
-              end: "bottom 42%",
-              onEnter: () => {
-                measure(el);
-                if (isClose) breathe();
-              },
-              onEnterBack: () => measure(el),
-            });
+      // ---- dot docking anchors ----
+      let breathed = false;
+      const breathe = () => {
+        if (breathed) return;
+        breathed = true;
+        gsap.fromTo(".close-cta .btn", { scale: 1 }, { scale: 1.05, duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" });
+      };
+      const attachDotScroll = () => {
+        active = heroSlot;
+        startFollow();
+        gsap.utils.toArray<HTMLElement>("[data-dot-anchor]").forEach((el) => {
+          const section = el.closest<HTMLElement>(".pf, .section, .hero, .close") || el;
+          const isClose = el.getAttribute("data-dot-anchor") === "close";
+          ScrollTrigger.create({
+            trigger: section,
+            start: "top 58%",
+            end: "bottom 42%",
+            onEnter: () => {
+              active = el;
+              if (isClose) breathe();
+            },
+            onEnterBack: () => {
+              active = el;
+            },
           });
-          ScrollTrigger.refresh();
-        };
+        });
+        ScrollTrigger.refresh();
+      };
 
-        // Intro — the dot writes the wordmark on every load; transform/opacity only.
-        measure(heroSlot);
-        const end = { x: targetX, y: targetYAbs - window.scrollY };
-        const s = dotSize();
-        gsap.set(letters, { yPercent: 125, opacity: 0 });
-        const proxy = { x: cx, y: cy };
-        const sync = () => {
-          cx = proxy.x;
-          cy = proxy.y;
+      // ---- intro: the dot writes the wordmark — EVERY page load ----
+      const letters = gsap.utils.toArray<HTMLElement>(".hm-l");
+      const mark = document.querySelector<HTMLElement>(".hero-mark")!;
+      const mr = mark.getBoundingClientRect();
+      const s = dotSize();
+      const end = posOf(heroSlot);
+      gsap.set(letters, { yPercent: 125, opacity: 0 });
+      cx = mr.left - 30;
+      cy = mr.top + mr.height * 0.52 - s / 2;
+      applyDot();
+      dot.style.opacity = "1";
+
+      const finish = () => attachDotScroll();
+      const proxy = { x: cx, y: cy };
+      const sync = () => {
+        cx = proxy.x;
+        cy = proxy.y;
+        applyDot();
+      };
+      const tl = gsap.timeline({ onUpdate: sync, onComplete: finish });
+      tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.11, ease: "back.out(1.6)", force3D: true }, 0.1);
+      tl.to(proxy, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
+      tl.to(proxy, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
+      tl.to(proxy, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
+
+      const skip = () => {
+        if (tl.progress() < 1) {
+          tl.progress(1);
+          tl.kill();
+          gsap.set(letters, { yPercent: 0, opacity: 1 });
+          cx = end.x;
+          cy = end.y;
           applyDot();
-        };
-        const finish = () => attachDotScroll();
-        const tl = gsap.timeline({ onUpdate: sync, onComplete: finish });
-        tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: isMobile ? 0.06 : 0.11, ease: "back.out(1.6)", force3D: true }, 0.1);
-        tl.to(proxy, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
-        tl.to(proxy, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
-        tl.to(proxy, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
+          finish();
+        }
+        removeSkip();
+      };
+      const evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
+      const removeSkip = () => evts.forEach((e) => window.removeEventListener(e, skip));
+      evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
 
-        const skip = () => {
-          if (tl.progress() < 1) {
-            tl.progress(1);
-            tl.kill();
-            gsap.set(letters, { yPercent: 0, opacity: 1 });
-            cx = end.x;
-            cy = end.y;
-            applyDot();
-            finish();
-          }
-          removeSkip();
-        };
-        const evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
-        const removeSkip = () => evts.forEach((e) => window.removeEventListener(e, skip));
-        evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
-        removers.push(removeSkip);
-      }, rootRef);
-
+      // ---- recalc anchor positions on resize and after the page settles ----
+      // The frames reserve their space via a fixed aspect-ratio (no CLS), so a
+      // resize + a post-load refresh keep every dock anchor accurate.
       const refresh = () => ScrollTrigger.refresh();
       window.addEventListener("resize", refresh, { passive: true });
       window.addEventListener("load", refresh, { once: true });
-      removers.push(() => window.removeEventListener("resize", refresh));
 
-      // ---- portfolio videos: exactly ONE plays at a time (the most visible) ----
-      // iOS/mobile refuse multiple simultaneous decodes, which is why extra clips
-      // sat frozen. On every intersection change we play only the most-visible clip
-      // and pause the rest; sources are lazy (preload="none", set on approach) with
-      // the mobile size on small screens; a rejected play() is retried on first tap.
-      const mqMobile = window.matchMedia("(max-width: 820px)");
-      const vids = Array.from(root.querySelectorAll<HTMLVideoElement>("video.pf-video"));
-      const pickSrc = (v: HTMLVideoElement) => {
-        const size = mqMobile.matches ? "mobile" : "desktop";
-        const canWebm = v.canPlayType('video/webm; codecs="vp9"') !== "";
-        return v.dataset[canWebm ? `${size}Webm` : `${size}Mp4`] || "";
+      return () => {
+        cancelAnimationFrame(rafId);
+        window.removeEventListener("resize", refresh);
+        removeSkip();
       };
-      const ensureSrc = (v: HTMLVideoElement) => {
-        if (!v.getAttribute("src")) {
-          const src = pickSrc(v);
-          if (src) {
-            v.src = src;
-            v.load();
+    }, rootRef);
+
+    // ---- portfolio videos: exactly ONE plays at a time (the most visible) ----
+    // Sources are lazy (preload="none", set on approach) with the mobile size on
+    // small screens. On any intersection change we reconcile playback once per
+    // frame (rAF-coalesced) so continuous scrolling never thrashes play()/pause()
+    // and every clip plays cleanly as it becomes most-visible — on desktop and
+    // mobile alike. iOS refuses multiple simultaneous decodes, so we keep it to
+    // one and retry a rejected play() on first tap. Skipped under reduced motion
+    // (the effect returns early above), so those visitors just see the poster.
+    const mqMobile = window.matchMedia("(max-width: 820px)");
+    const videos: HTMLVideoElement[] = rootRef.current
+      ? Array.from(rootRef.current.querySelectorAll<HTMLVideoElement>("video.pf-video"))
+      : [];
+    const pickSrc = (v: HTMLVideoElement) => {
+      const size = mqMobile.matches ? "mobile" : "desktop";
+      const canWebm = v.canPlayType('video/webm; codecs="vp9"') !== "";
+      return v.dataset[canWebm ? `${size}Webm` : `${size}Mp4`] || "";
+    };
+    const ensureSrc = (v: HTMLVideoElement) => {
+      if (!v.getAttribute("src")) {
+        const src = pickSrc(v);
+        if (src) {
+          v.src = src;
+          v.load();
+        }
+      }
+    };
+    let io: IntersectionObserver | null = null;
+    let selRaf = 0;
+    let touchArmed = false;
+    let onScroll: (() => void) | null = null;
+    if (videos.length && "IntersectionObserver" in window) {
+      const visible = new Set<HTMLVideoElement>(); // clips currently near the viewport
+      const armTouch = () => {
+        if (touchArmed) return;
+        touchArmed = true;
+        const h = () => {
+          touchArmed = false;
+          select();
+        };
+        window.addEventListener("touchstart", h, { once: true, passive: true });
+        window.addEventListener("pointerdown", h, { once: true, passive: true });
+      };
+      // Play the on-screen clip whose centre is nearest the viewport centre; pause
+      // the rest. Distance-to-centre is monotonic with scroll, so — unlike
+      // intersectionRatio, which saturates at 1 for any fully-visible clip and
+      // makes adjacent clips flap or stick — it yields one clear winner and a clean
+      // hand-off. Computed directly over the (≤3) clips each frame, so it never
+      // depends on IntersectionObserver delivery timing. Exactly one ever plays
+      // (iOS allows only one decode); a rejected play() retries on first tap.
+      const select = () => {
+        selRaf = 0;
+        let best: HTMLVideoElement | null = null;
+        let bestD = Infinity;
+        const vh = window.innerHeight;
+        const mid = vh / 2;
+        for (const v of videos) {
+          const r = v.getBoundingClientRect();
+          if (r.bottom <= 0 || r.top >= vh) continue; // off-screen — not a candidate
+          const d = Math.abs(r.top + r.height / 2 - mid);
+          if (d < bestD) {
+            bestD = d;
+            best = v;
+          }
+        }
+        for (const v of videos) {
+          if (v === best) {
+            ensureSrc(v);
+            if (v.paused) v.play().catch(() => armTouch());
+          } else if (!v.paused) {
+            v.pause();
           }
         }
       };
-      if (vids.length && "IntersectionObserver" in window) {
-        const ratios = new Map<HTMLVideoElement, number>();
-        let current: HTMLVideoElement | null = null;
-        let touchArmed = false;
-        const armTouch = () => {
-          if (touchArmed) return;
-          touchArmed = true;
-          const h = () => {
-            touchArmed = false;
-            if (current) current.play().catch(() => {});
-          };
-          window.addEventListener("touchstart", h, { once: true, passive: true });
-          window.addEventListener("pointerdown", h, { once: true, passive: true });
-          removers.push(() => {
-            window.removeEventListener("touchstart", h);
-            window.removeEventListener("pointerdown", h);
-          });
-        };
-        const update = () => {
-          let best: HTMLVideoElement | null = null;
-          let bestR = 0;
-          ratios.forEach((r, v) => {
-            if (r > bestR) {
-              bestR = r;
-              best = v;
+      const schedule = () => {
+        if (!selRaf) selRaf = requestAnimationFrame(select);
+      };
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const v = e.target as HTMLVideoElement;
+            if (e.isIntersecting) {
+              visible.add(v);
+              ensureSrc(v); // buffer on approach; decode happens only on play()
+            } else {
+              visible.delete(v);
             }
-          });
-          vids.forEach((v) => {
-            if (v !== best && !v.paused) v.pause(); // never more than one playing
-          });
-          current = best;
-          if (best && bestR > 0) {
-            ensureSrc(best);
-            (best as HTMLVideoElement).play().catch(() => armTouch());
           }
-        };
-        io = new IntersectionObserver(
-          (entries) => {
-            for (const e of entries) {
-              const v = e.target as HTMLVideoElement;
-              ratios.set(v, e.isIntersecting ? e.intersectionRatio : 0);
-              if (e.isIntersecting) ensureSrc(v); // buffer on approach; decode happens only on play()
-            }
-            update();
-          },
-          { rootMargin: "200px 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
-        );
-        vids.forEach((v) => io!.observe(v));
-      }
-    };
-
-    const kick = requestAnimationFrame(start); // defer heavy work past first paint
+          schedule();
+        },
+        { rootMargin: "200px 0px", threshold: 0 }
+      );
+      videos.forEach((v) => io!.observe(v));
+      // Re-select on scroll (rAF-throttled) so the hand-off tracks scroll position
+      // continuously — not only at IntersectionObserver threshold crossings — and
+      // only while a clip is near (cheap: a getBoundingClientRect for ≤3 elements).
+      onScroll = () => {
+        if (visible.size) schedule();
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
 
     // ---- magnetic buttons (desktop, fine pointer) ----
     const fine = window.matchMedia("(pointer:fine)").matches;
     const magnets: Array<() => void> = [];
     if (fine) {
-      root.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((btn) => {
+      rootRef.current?.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((btn) => {
         const move = (e: PointerEvent) => {
           const r = btn.getBoundingClientRect();
           gsap.to(btn, { x: (e.clientX - (r.left + r.width / 2)) * 0.25, y: (e.clientY - (r.top + r.height / 2)) * 0.3, duration: 0.3, ease: "power2.out" });
@@ -332,11 +361,10 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
     }
 
     return () => {
-      cancelAnimationFrame(kick);
-      cancelAnimationFrame(rafId);
-      ctx?.revert();
+      ctx.revert();
       io?.disconnect();
-      removers.forEach((fn) => fn());
+      if (selRaf) cancelAnimationFrame(selRaf);
+      if (onScroll) window.removeEventListener("scroll", onScroll);
       magnets.forEach((fn) => fn());
       document.body.classList.remove("dot-live");
     };
