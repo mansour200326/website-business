@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { archivo, spaceMono, instrumentSerif, manrope } from "./fonts";
+import { archivo, spaceMono, instrumentSerif } from "./fonts";
 import { site } from "@/config/site";
 import "./globals.css";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Atelier Digital — sites that ship in days, and look like they took months.",
+        alt: "Websmith — sites that ship in days, and look like they took months.",
       },
     ],
   },
@@ -64,7 +64,7 @@ export default function RootLayout({
         </noscript>
       </head>
       <body
-        className={`${archivo.variable} ${spaceMono.variable} ${instrumentSerif.variable} ${manrope.variable}`}
+        className={`${archivo.variable} ${spaceMono.variable} ${instrumentSerif.variable}`}
       >
         {children}
       </body>

@@ -4,7 +4,7 @@ export default function Nav() {
   return (
     <nav>
       <div className="nav-in">
-        <a className="logo" href="/#top" aria-label="Atelier Digital — home">
+        <a className="logo" href="/#top" aria-label="Websmith — home">
           <Logo variant="inline" tone="ink" />
         </a>
         <div className="links">

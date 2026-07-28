@@ -2,9 +2,9 @@
  * config/site.ts — single source of truth for the whole site.
  *
  * Change values here and the entire site updates:
- *  - studioName:      leave "" to render the "name in production" placeholder
- *                     treatment in the nav/footer; set it to your real studio
- *                     name to show it everywhere.
+ *  - studioName:      the studio name used in the <title> and metadata. The
+ *                     visual wordmark renders from the Instrument Serif
+ *                     treatment (components/Logo.tsx), not this string.
  *  - whatsappNumber:  placeholder "+9715XXXXXXXX". Every WhatsApp CTA builds a
  *                     wa.me link from this, with a pre-filled message (naming
  *                     the service where relevant).
@@ -55,14 +55,14 @@ export interface SectionHead {
 }
 
 export const site = {
-  /** "" → nav/footer show the "name in production" placeholder treatment. */
-  studioName: "Atelier Digital",
+  /** Studio name for <title> / metadata. The visual wordmark is rendered separately. */
+  studioName: "Websmith",
 
   /** Placeholder. Every CTA builds a wa.me link from this. */
   whatsappNumber: "+9715XXXXXXXX",
 
   /** Contact email for data / privacy questions. Replace with your real address. */
-  contactEmail: "privacy@atelierdigital.com",
+  contactEmail: "privacy@websmith.ae",
 
   /** Pre-filled WhatsApp messages. `{service}` is swapped for the service name. */
   whatsapp: {
@@ -148,7 +148,7 @@ export const site = {
       name: "Signature builds",
       subject: "a signature build",
       description:
-        "The full treatment — brand-level art direction, custom animation, and a site nobody scrolls past.",
+        "Built from the ground up — brand-level art direction, custom animation, and a site nobody scrolls past.",
     },
   ] as Service[],
 
@@ -177,12 +177,11 @@ export const site = {
     title: "Let's build yours.",
     sub: "Tell me what you do — I'll tell you what your website should do. Quotes over WhatsApp, usually within hours.",
     button: "Message on WhatsApp",
-    /** meta line strings; the copyright line is generated from studioName */
+    /** meta line strings; the copyright + legal lines render separately */
     meta: ["Dubai, UAE — ships worldwide", "English / العربية"],
+    /** small legal line naming the operating entity */
+    legal: "Websmith is a Web Smith FZCO company.",
   },
 };
 
 export type Site = typeof site;
-
-/** Placeholder used for the © line when studioName isn't set yet. */
-export const NAME_PLACEHOLDER = "name in production";

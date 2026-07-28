@@ -24,7 +24,8 @@ export default function Privacy() {
           <div className="legal">
             <p className="lead">
               This website is how most projects with {studio} begin — so here is exactly what happens
-              to anything you share through it.
+              to anything you share through it. {studio} is operated by Web Smith FZCO (Dubai, UAE),
+              which is responsible for the information described below.
             </p>
 
             <h2>What we collect</h2>
@@ -43,7 +44,7 @@ export default function Privacy() {
             <h2>Sharing</h2>
             <p>
               We do not sell your information, and we do not share it with third parties. It stays
-              between you and {studio}.
+              between you and Web Smith FZCO.
             </p>
 
             <h2>Questions or removal</h2>
