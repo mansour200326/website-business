@@ -1,38 +1,32 @@
 /**
  * config/site.ts — single source of truth for the whole site.
  *
- * Change values here and the entire site updates:
- *  - studioName:      the studio name used in the <title> and metadata. The
- *                     visual wordmark renders from the Instrument Serif
- *                     treatment (components/Logo.tsx), not this string.
+ *  - studioName:      name used in <title> / metadata. The visual wordmark
+ *                     ("Websmith.") renders from the Instrument Serif treatment
+ *                     (components/Logo.tsx), not this string.
  *  - whatsappNumber:  placeholder "+9715XXXXXXXX". Every WhatsApp CTA builds a
- *                     wa.me link from this, with a pre-filled message (naming
- *                     the service where relevant).
+ *                     wa.me link from this, with a pre-filled message.
  */
 
-export interface Scene {
-  /** url-safe id used to locate the screenshot in /public/work (`${slug}-desktop.(png|jpeg)`) */
+export interface Project {
+  /** url-safe id; screenshot lives at /public/portfolio/${slug}.(jpg|jpeg|png) */
   slug: string;
-  /** work index label, e.g. "W·01" */
-  wno: string;
-  /** project title (also the wordmark shown in the gradient fallback) */
-  title: string;
-  /** sector / category line */
-  meta: string;
-  /** short description paragraph */
-  description: string;
-  /** primary gradient hue for the fallback treatment */
-  hue: string;
-  /** secondary gradient hue for the fallback treatment */
-  hue2: string;
+  /** project name, shown in oversized serif */
+  name: string;
+  /** one-line description */
+  blurb: string;
+  /** live site URL (placeholder .example domains — replace with real URLs) */
+  liveUrl: string;
+  /** very-low-saturation background tint for this project's moment */
+  tint: string;
 }
 
-export interface Service {
-  /** service name (sentence case) */
+export interface Package {
+  /** package name (Launch / Store / Signature) */
   name: string;
-  /** name inserted into the pre-filled WhatsApp quote message */
+  /** inserted into the pre-filled WhatsApp quote message */
   subject: string;
-  /** two-line, plain-language description — no tiers, no numbers */
+  /** one/two-line description — no prices */
   description: string;
 }
 
@@ -45,15 +39,6 @@ export interface ProcessStep {
   text: string;
 }
 
-export interface SectionHead {
-  /** small mono eyebrow label */
-  eyebrow: string;
-  /** index shown at the right of the ruled header row */
-  idx: string;
-  /** section title */
-  title: string;
-}
-
 export const site = {
   /** Studio name for <title> / metadata. The visual wordmark is rendered separately. */
   studioName: "Websmith",
@@ -64,95 +49,88 @@ export const site = {
   /** Contact email for data / privacy questions. Replace with your real address. */
   contactEmail: "privacy@websmith.ae",
 
-  /** Pre-filled WhatsApp messages. `{service}` is swapped for the service name. */
+  /** Pre-filled WhatsApp messages. `{service}` is swapped for the package name. */
   whatsapp: {
-    general: "Hi — I'd like to get a quote for a website.",
-    quoteTemplate: "Hi — I'd like a quote for {service}.",
+    general: "Hi Atlas — I'd like to talk about a website for my business.",
+    quoteTemplate: "Hi Atlas — I'd like a quote for the {service} package.",
   },
 
   /** SEO / metadata */
   meta: {
-    /** swapped to studioName when set */
-    title: "Independent Web Studio — Dubai",
+    title: "Websmith — Independent Web Studio, Dubai",
     description:
-      "Custom design, real animation, and native Arabic — one independent studio in Dubai, no agency overhead.",
-    /** absolute base URL of the deployed site, used for OG tags */
-    url: "https://independent-web-studio.example",
+      "Websmith forges custom brand websites in Dubai — real motion, native Arabic, shipped in days. A Web Smith FZCO company.",
+    url: "https://websmith.ae",
     themeColor: "#F6F4EF",
   },
 
-  /** HERO */
+  /** HERO — the wordmark is drawn by the intro; these are the lines beneath it */
   hero: {
-    headline: "Sites that ship in days — and look like they took months.",
-    sub: "Custom design, real animation, and native Arabic — one independent studio in Dubai, no agency overhead.",
-    ctaPrimary: "Get a quote on WhatsApp",
-    ctaSecondary: "See the work",
+    tagline: "Websites, forged properly.",
+    support:
+      "Custom design, real motion, and native Arabic — one independent studio in Dubai, no agency overhead.",
+    cta: "Start on WhatsApp",
   },
 
-  /** RULED SECTION HEADERS */
-  sections: {
-    work: { eyebrow: "Selected work", idx: "01", title: "Work that makes people ask who built it." },
-    services: { eyebrow: "Services", idx: "02", title: "Whatever you're building, it deserves better than a template." },
-    process: { eyebrow: "Process", idx: "03", title: "Measured in days, not months." },
-  } as Record<"work" | "services" | "process", SectionHead>,
-
-  /** WORK — alternating cards; screenshots fill the cards when present */
-  scenes: [
+  /** PORTFOLIO — each project is a full-viewport moment */
+  portfolio: [
+    {
+      slug: "sumou-jet",
+      name: "Sumou Jet",
+      blurb: "Private jet charter, forged for the Gulf's most demanding travellers.",
+      liveUrl: "https://sumou-jet.example",
+      tint: "#EDF0F3",
+    },
     {
       slug: "grailhaus",
-      wno: "W·01",
-      title: "Grailhaus",
-      meta: "Sports collectibles · online store",
-      description:
-        "A one-of-one trading card shop with an animated identity, custom storefront, and an archive that takes offers, not orders.",
-      hue: "#C9943A",
-      hue2: "#7D1F1F",
+      name: "Grailhaus",
+      blurb: "A one-of-one trading-card vault where collectors make offers, not orders.",
+      liveUrl: "https://grailhaus.example",
+      tint: "#F4EFE6",
     },
     {
-      slug: "sumoujet",
-      wno: "W·02",
-      title: "Sumou Jet",
-      meta: "Private aviation · brand site",
-      description:
-        "Cinematic charter website for Gulf clientele — hero film, custom booking flow, and a native Arabic edition throughout.",
-      hue: "#D8CFC0",
-      hue2: "#1A2436",
+      slug: "rack-on",
+      name: "Rack On",
+      blurb: "Barbell-grade e-commerce for a strength brand that doesn't do subtle.",
+      liveUrl: "https://rack-on.example",
+      tint: "#F1EFEA",
     },
     {
-      slug: "maisonpadel",
-      wno: "W·03",
-      title: "Maison Padel",
-      meta: "Members' club · brand & booking",
-      description:
-        "Dubai's first luxury indoor padel club — brand system, bilingual booking experience, and an interactive floor plan.",
-      hue: "#1F4A38",
-      hue2: "#8B5A2B",
+      slug: "prairies-fodder",
+      name: "Prairies Fodder",
+      blurb: "Farm-to-trough commerce for a prairie feed supplier, built to move tonnes.",
+      liveUrl: "https://prairies-fodder.example",
+      tint: "#EDF1EA",
     },
-  ] as Scene[],
+  ] as Project[],
 
-  /** SERVICES — plain language, no tiers, no numbers */
-  services: [
+  /** PACKAGES — no prices */
+  packages: [
     {
-      name: "Websites",
-      subject: "a website",
+      name: "Launch",
+      subject: "Launch",
       description:
-        "Custom-designed brand sites — built in days, made to make you look established from the first click.",
+        "A custom brand site, forged in days — everything you need to look established from day one.",
     },
     {
-      name: "Online stores",
-      subject: "an online store",
+      name: "Store",
+      subject: "Store",
       description:
-        "E-commerce that's ready to sell — payments, products, and a storefront your customers actually enjoy.",
+        "A storefront that's ready to sell — products, payments, and a checkout that actually converts.",
     },
     {
-      name: "Signature builds",
-      subject: "a signature build",
+      name: "Signature",
+      subject: "Signature",
       description:
-        "Built from the ground up — brand-level art direction, custom animation, and a site nobody scrolls past.",
+        "Brand-level art direction and custom motion, built from the ground up — a site nobody scrolls past.",
     },
-  ] as Service[],
+  ] as Package[],
 
-  /** PROCESS — Day 0 → Day 5 */
+  /** ABOUT / PROCESS */
+  about: {
+    title: "One smith. Measured in days, not months.",
+    body: "Websmith is one independent studio in Dubai — design, build, motion, and native Arabic under one roof. No agency overhead, no six-week timelines. You talk to the person doing the work.",
+  },
   process: [
     { day: "Day 0", title: "Brief", text: "One call or one voice note — I take it from there." },
     { day: "Day 1", title: "Draft", text: "A working design in your hands, with real motion." },
@@ -160,27 +138,16 @@ export const site = {
     { day: "Day 5", title: "Ship", text: "Your domain, your accounts, your keys." },
   ] as ProcessStep[],
 
-  /** BILINGUAL split */
-  bilingual: {
-    en: {
-      heading: "Your site, in English.",
-      body: "Structured and written for the reader — and every build ships ready for its Arabic mirror.",
-    },
-    ar: {
-      heading: "موقعك، بالعربية.",
-      body: "نسخة عربية أصلية — اتجاه صحيح، خط مدروس، ونصوص مكتوبة للقارئ العربي.",
-    },
+  /** CLOSE — where the dot lands, in the WhatsApp CTA */
+  close: {
+    title: "Tell Atlas what you need.",
+    support: "Quotes over WhatsApp, usually within hours.",
+    cta: "Message on WhatsApp",
   },
 
   /** FOOTER */
   footer: {
-    title: "Let's build yours.",
-    sub: "Tell me what you do — I'll tell you what your website should do. Quotes over WhatsApp, usually within hours.",
-    button: "Message on WhatsApp",
-    /** meta line strings; the copyright + legal lines render separately */
-    meta: ["Dubai, UAE — ships worldwide", "English / العربية"],
-    /** small legal line naming the operating entity */
-    legal: "Websmith is a Web Smith FZCO company.",
+    legal: "Websmith is a Web Smith FZCO company · websmith.ae",
   },
 };
 

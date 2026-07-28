@@ -1,30 +1,21 @@
 import { site } from "@/config/site";
-import { waLink } from "@/lib/whatsapp";
 import Logo from "./Logo";
 
 export default function Footer() {
-  const { footer } = site;
   return (
-    <footer id="contact">
+    <footer id="footer">
       <div className="wrap">
-        <div className="f-logo rv">
-          <Logo variant="display" tone="ivory" />
+        <div className="f-mark">
+          <Logo variant="inline" tone="ivory" />
         </div>
-        <div className="f-title rv">{footer.title}</div>
-        <p className="f-sub rv">{footer.sub}</p>
-        <a className="btn-wa rv" href={waLink()} target="_blank" rel="noopener noreferrer">
-          {footer.button}
-        </a>
-        <div className="f-meta">
-          {footer.meta.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-          <a className="f-link" href="/privacy">
-            Privacy
-          </a>
-          <span>© Websmith</span>
+        <div className="f-in">
+          <span className="f-legal">{site.footer.legal}</span>
+          <div className="f-right">
+            <a className="f-link sweep" href="/privacy">
+              Privacy
+            </a>
+          </div>
         </div>
-        <p className="f-legal">{footer.legal}</p>
       </div>
     </footer>
   );
