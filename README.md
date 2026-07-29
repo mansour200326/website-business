@@ -132,12 +132,12 @@ project names and the watermark; Manrope handles all UI text.
   above the fold in the hero).
 - Portfolio clips are web-optimised (WebM + MP4, desktop + mobile sizes, muted
   and audio-stripped, desktop under 2.5 MB / mobile under 1 MB) and
-  `preload="none"`. Clips lazy-load the right size/codec on approach (an
-  `IntersectionObserver` gates it); playback then plays **exactly one clip at a
-  time** — the one whose centre is nearest the viewport centre, pausing the rest.
-  Nearest-to-centre is monotonic with scroll, so it never flaps or sticks the way
-  an `intersectionRatio` pick does (that ratio saturates at 1 for any fully-visible
-  clip); it also respects mobile decoders, which allow only one decode. A rejected
+  `preload="none"`. Each clip lazy-loads the right size/codec as it approaches (an
+  `IntersectionObserver` with a `rootMargin` starts it slightly before it enters)
+  and plays while it is in or near the viewport, pausing once it leaves — so all
+  visible project videos run at once as you scroll. On desktop every visible clip
+  plays; on mobile playback is capped to the two nearest the viewport centre, a
+  safeguard against multi-decode scroll stutter on mid-range phones. A rejected
   autoplay is retried on first tap. Nothing downloads until the visitor approaches
   the portfolio. The frame's aspect-ratio comes from the poster's intrinsic size,
   so there is no layout shift; the hero reserves its space, so the intro causes no

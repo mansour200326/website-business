@@ -169,7 +169,7 @@ footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;ma
 .f-mark{margin-bottom:26px}
 .f-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px}
 .f-legal{color:#8A867D;font-size:13px}
-.f-right{display:flex;gap:22px;align-items:center}
+.f-right{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
 .f-link{color:#8A867D;text-decoration:none;font-size:13px}
 .f-link::after{background:var(--cyan)}
 
@@ -182,6 +182,7 @@ footer{background:var(--ink-deep);color:var(--bg);border-radius:28px 28px 0 0;ma
 .legal h2{font-family:var(--font-sans),sans-serif;font-weight:700;font-size:19px;letter-spacing:-.01em;margin:40px 0 12px}
 .legal p{color:var(--body);margin-bottom:14px}
 .legal a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--cyan);padding-bottom:1px}
+.legal .legal-note{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.6}
 
 /* ---------- MOTION / REDUCED MOTION ---------- */
 @media(max-width:680px){:root{--dot:10px}}
