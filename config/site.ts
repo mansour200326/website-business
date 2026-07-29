@@ -140,6 +140,7 @@ export const site = {
   /** FOOTER */
   footer: {
     legal: "Websmith is a Web Smith FZCO company",
+    copyright: "© 2026 Web Smith FZCO. All rights reserved.",
   },
 };
 
