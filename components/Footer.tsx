@@ -10,7 +10,11 @@ export default function Footer() {
           <Logo variant="inline" tone="ivory" />
         </div>
         <div className="f-in">
-          <span className="f-legal">{site.footer.legal}</span>
+          <span className="f-legal">
+            {site.footer.legal}
+            <br />
+            {site.footer.copyright}
+          </span>
           <div className="f-right">
             <a className="f-link sweep" href={waLink()} target="_blank" rel="noopener noreferrer">
               WhatsApp

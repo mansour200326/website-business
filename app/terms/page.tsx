@@ -70,6 +70,21 @@ export default function Terms() {
               own portfolio and promotional materials, unless we agree otherwise in writing.
             </p>
 
+            <h2>Confidentiality</h2>
+            <p>
+              Everything you share with us to get your project built — your business details, project
+              requirements, briefs, unlaunched designs, and commercial information — is treated as
+              confidential. We use it only to deliver your project, and we don&apos;t share it with
+              third parties, except where it&apos;s needed to provide the service itself (for
+              example, setting up your hosting platform) or where the law requires it.
+            </p>
+            <p>
+              How this fits with the portfolio right above: once your website is publicly launched,
+              we may show the finished, public work in our portfolio and marketing. Your private
+              business information is never part of that. And if you&apos;d rather your site not
+              appear in our portfolio at all, just tell us in writing and we&apos;ll leave it out.
+            </p>
+
             <h2>Third-party services</h2>
             <p>
               Hosting, domain registration, and any platforms or services your site relies on are
@@ -83,6 +98,12 @@ export default function Terms() {
               To the extent the law allows, our total liability for anything arising from a project
               is limited to the fees you have paid us for that project. We aren&apos;t liable for
               indirect or consequential losses.
+            </p>
+
+            <h2>Intellectual property of this website</h2>
+            <p>
+              All content, design, and code on websmith.ae is the property of Web Smith FZCO and may
+              not be copied or reproduced without permission.
             </p>
 
             <h2>Governing law</h2>
