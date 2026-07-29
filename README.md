@@ -47,16 +47,16 @@ export const site = {
 ```ts
 export const site = {
   ...
-  whatsappNumber: "+9715XXXXXXXX",   // ← replace with your real number
+  whatsappNumber: "+971 58 546 1253",   // ← the business WhatsApp number
 };
 ```
 
-Every CTA (the hero "Get a quote on WhatsApp", each service "Get a quote →"
-link, and the footer "Message on WhatsApp" button) builds a
+Every CTA (the hero "Start on WhatsApp" button, each package "Get a quote →"
+link, and the closing "Message on WhatsApp" button) builds a
 [`wa.me`](https://wa.me) link from this number with a pre-filled message — the
-service links name the service. Use full international format, e.g.
-`+971501234567`. Until a real number is set the links point at the placeholder
-and won't open a real chat.
+package links name the package. Use full international format; the number is
+reduced to digits for the link (e.g. `+971 58 546 1253` →
+`https://wa.me/971585461253`).
 
 ### Everything else
 

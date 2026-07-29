@@ -4,7 +4,7 @@
  *  - studioName:      name used in <title> / metadata. The visual wordmark
  *                     ("Websmith.") renders from the Instrument Serif treatment
  *                     (components/Logo.tsx), not this string.
- *  - whatsappNumber:  placeholder "+9715XXXXXXXX". Every WhatsApp CTA builds a
+ *  - whatsappNumber:  the business WhatsApp number. Every WhatsApp CTA builds a
  *                     wa.me link from this, with a pre-filled message.
  */
 
@@ -43,8 +43,8 @@ export const site = {
   /** Studio name for <title> / metadata. The visual wordmark is rendered separately. */
   studioName: "Websmith",
 
-  /** Placeholder. Every CTA builds a wa.me link from this. */
-  whatsappNumber: "+9715XXXXXXXX",
+  /** Business WhatsApp number. Every CTA builds a wa.me link from this. */
+  whatsappNumber: "+971 58 546 1253",
 
   /** Contact email for data / privacy questions. Replace with your real address. */
   contactEmail: "privacy@websmith.ae",

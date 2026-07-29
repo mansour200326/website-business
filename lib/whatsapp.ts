@@ -4,9 +4,9 @@ import { site } from "@/config/site";
  * Build a wa.me link from the configured WhatsApp number with a pre-filled
  * message. Pass a service subject to name it in the message.
  *
- * The number is reduced to digits (wa.me requires digits only). With the
- * "+9715XXXXXXXX" placeholder this yields a non-functional link by design —
- * set a real number in config/site.ts to make every CTA live.
+ * The number is reduced to digits (wa.me requires digits only), e.g.
+ * "+971 58 546 1253" → https://wa.me/971585461253. The number lives in
+ * config/site.ts.
  */
 export function waLink(subject?: string): string {
   const digits = site.whatsappNumber.replace(/\D/g, "");
