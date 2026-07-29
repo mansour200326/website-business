@@ -57,7 +57,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${instrumentSerif.variable}`}>{children}</body>
+      <body className={`${manrope.variable} ${instrumentSerif.variable}`}>
+        {/* Every entry starts at the top: disable the browser's scroll restoration
+            before it can fire (runs as the body parses, ahead of hydration). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{history.scrollRestoration='manual';window.scrollTo(0,0);}catch(e){}",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

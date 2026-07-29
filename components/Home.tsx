@@ -30,7 +30,23 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
 
   useIso(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return; // CSS renders everything final; dot hidden, static period shown
+
+    // ---- Part 1: every entry starts at the top (fresh, refresh, back-nav) ----
+    // Reinforces the layout's early script, and forces the top for all visitors —
+    // including reduced-motion, who return before the intro is built.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return; // only a bfcache restore (back/forward navigation)
+      window.scrollTo(0, 0);
+      if (!reduce) window.location.reload(); // reload so the intro replays from the top
+    };
+    window.addEventListener("pageshow", onPageShow);
+
+    if (reduce) {
+      // CSS renders everything final; dot hidden, static period shown.
+      return () => window.removeEventListener("pageshow", onPageShow);
+    }
 
     gsap.registerPlugin(ScrollTrigger);
     const dot = dotRef.current!;
@@ -188,6 +204,14 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
       // ---- intro: the dot writes the wordmark — EVERY page load ----
       const letters = gsap.utils.toArray<HTMLElement>(".hm-l");
       const mark = document.querySelector<HTMLElement>(".hero-mark")!;
+      // The homepage arrives AFTER the wordmark is written: hide the hero body and
+      // nav up front (pre-paint, so no flash) — but keep their layout space, so
+      // nothing shifts when they fade in. Below-fold content stays in normal flow
+      // and reveals on scroll via its own triggers.
+      const heroBody = gsap.utils.toArray<HTMLElement>(".hero-tagline, .hero-support, .hero-cta");
+      const navEl = document.querySelector<HTMLElement>("nav");
+      gsap.set(heroBody, { y: 22, opacity: 0 });
+      if (navEl) gsap.set(navEl, { opacity: 0 });
       const mr = mark.getBoundingClientRect();
       const s = dotSize();
       const end = posOf(heroSlot);
@@ -204,17 +228,28 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
         cy = proxy.y;
         applyDot();
       };
+      // One continuous choreography: empty ivory → the dot writes the wordmark and
+      // settles as the period → a ~0.4s hold → the hero body fade-rises and the nav
+      // fades in → the living homepage. No hard cut.
       const tl = gsap.timeline({ onUpdate: sync, onComplete: finish });
       tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.11, ease: "back.out(1.6)", force3D: true }, 0.1);
       tl.to(proxy, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
       tl.to(proxy, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
       tl.to(proxy, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
+      // hold, then bring the homepage in
+      tl.to(heroBody, { y: 0, opacity: 1, duration: 0.5, stagger: 0.09, ease: "power2.out", force3D: true }, "+=0.4");
+      if (navEl) tl.to(navEl, { opacity: 1, duration: 0.55, ease: "power1.out" }, "<0.05");
 
+      const revealAll = () => {
+        gsap.set(letters, { yPercent: 0, opacity: 1 });
+        gsap.set(heroBody, { y: 0, opacity: 1 });
+        if (navEl) gsap.set(navEl, { opacity: 1 });
+      };
       const skip = () => {
         if (tl.progress() < 1) {
           tl.progress(1);
           tl.kill();
-          gsap.set(letters, { yPercent: 0, opacity: 1 });
+          revealAll();
           cx = end.x;
           cy = end.y;
           applyDot();
@@ -222,9 +257,13 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
         }
         removeSkip();
       };
+      // Register skip listeners one frame late, so the forced scroll-to-top above
+      // (Part 1) can never be mistaken for a user scroll that skips the intro.
       const evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
       const removeSkip = () => evts.forEach((e) => window.removeEventListener(e, skip));
-      evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
+      const armId = requestAnimationFrame(() => {
+        evts.forEach((e) => window.addEventListener(e, skip, { once: true, passive: true }));
+      });
 
       // ---- recalc anchor positions on resize and after the page settles ----
       // The frames reserve their space via a fixed aspect-ratio (no CLS), so a
@@ -235,6 +274,7 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
 
       return () => {
         cancelAnimationFrame(rafId);
+        cancelAnimationFrame(armId);
         window.removeEventListener("resize", refresh);
         removeSkip();
       };
@@ -365,6 +405,7 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
       io?.disconnect();
       if (selRaf) cancelAnimationFrame(selRaf);
       if (onScroll) window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pageshow", onPageShow);
       magnets.forEach((fn) => fn());
       document.body.classList.remove("dot-live");
     };
