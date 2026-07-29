@@ -280,15 +280,16 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
       };
     }, rootRef);
 
-    // ---- portfolio videos: exactly ONE plays at a time (the most visible) ----
-    // Sources are lazy (preload="none", set on approach) with the mobile size on
-    // small screens. On any intersection change we reconcile playback once per
-    // frame (rAF-coalesced) so continuous scrolling never thrashes play()/pause()
-    // and every clip plays cleanly as it becomes most-visible — on desktop and
-    // mobile alike. iOS refuses multiple simultaneous decodes, so we keep it to
-    // one and retry a rejected play() on first tap. Skipped under reduced motion
-    // (the effect returns early above), so those visitors just see the poster.
+    // ---- portfolio videos: every near-viewport clip plays simultaneously ----
+    // A clip starts playing as it approaches (rootMargin, slightly before it
+    // enters) and pauses once it leaves, so all visible project videos run at once
+    // while scrolling. Sources are lazy (preload="none", set on approach) with the
+    // mobile size on small screens; the poster shows until playback. On mobile we
+    // cap concurrent playback to the two nearest clips (a mid-range-phone safeguard
+    // against multi-decode scroll stutter); desktop plays all that are visible.
+    // Skipped under reduced motion (the effect returns early above) — poster only.
     const mqMobile = window.matchMedia("(max-width: 820px)");
+    const maxPlaying = mqMobile.matches ? 2 : Infinity;
     const videos: HTMLVideoElement[] = rootRef.current
       ? Array.from(rootRef.current.querySelectorAll<HTMLVideoElement>("video.pf-video"))
       : [];
@@ -311,41 +312,33 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
     let touchArmed = false;
     let onScroll: (() => void) | null = null;
     if (videos.length && "IntersectionObserver" in window) {
-      const visible = new Set<HTMLVideoElement>(); // clips currently near the viewport
+      const visible = new Set<HTMLVideoElement>(); // clips currently in/near the viewport
       const armTouch = () => {
         if (touchArmed) return;
         touchArmed = true;
         const h = () => {
           touchArmed = false;
-          select();
+          apply();
         };
         window.addEventListener("touchstart", h, { once: true, passive: true });
         window.addEventListener("pointerdown", h, { once: true, passive: true });
       };
-      // Play the on-screen clip whose centre is nearest the viewport centre; pause
-      // the rest. Distance-to-centre is monotonic with scroll, so — unlike
-      // intersectionRatio, which saturates at 1 for any fully-visible clip and
-      // makes adjacent clips flap or stick — it yields one clear winner and a clean
-      // hand-off. Computed directly over the (≤3) clips each frame, so it never
-      // depends on IntersectionObserver delivery timing. Exactly one ever plays
-      // (iOS allows only one decode); a rejected play() retries on first tap.
-      const select = () => {
+      // Play the visible clips (capped to `maxPlaying`, keeping the nearest to the
+      // viewport centre); pause everything else. A rejected play() retries on tap.
+      const apply = () => {
         selRaf = 0;
-        let best: HTMLVideoElement | null = null;
-        let bestD = Infinity;
-        const vh = window.innerHeight;
-        const mid = vh / 2;
-        for (const v of videos) {
-          const r = v.getBoundingClientRect();
-          if (r.bottom <= 0 || r.top >= vh) continue; // off-screen — not a candidate
-          const d = Math.abs(r.top + r.height / 2 - mid);
-          if (d < bestD) {
-            bestD = d;
-            best = v;
-          }
+        let playing: HTMLVideoElement[] = [...visible];
+        if (playing.length > maxPlaying) {
+          const mid = window.innerHeight / 2;
+          const dist = (v: HTMLVideoElement) => {
+            const r = v.getBoundingClientRect();
+            return Math.abs(r.top + r.height / 2 - mid);
+          };
+          playing = playing.sort((a, b) => dist(a) - dist(b)).slice(0, maxPlaying);
         }
+        const play = new Set(playing);
         for (const v of videos) {
-          if (v === best) {
+          if (play.has(v)) {
             ensureSrc(v);
             if (v.paused) v.play().catch(() => armTouch());
           } else if (!v.paused) {
@@ -354,7 +347,7 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
         }
       };
       const schedule = () => {
-        if (!selRaf) selRaf = requestAnimationFrame(select);
+        if (!selRaf) selRaf = requestAnimationFrame(apply);
       };
       io = new IntersectionObserver(
         (entries) => {
@@ -369,16 +362,17 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
           }
           schedule();
         },
-        { rootMargin: "200px 0px", threshold: 0 }
+        { rootMargin: "300px 0px", threshold: 0 } // start slightly before it enters
       );
       videos.forEach((v) => io!.observe(v));
-      // Re-select on scroll (rAF-throttled) so the hand-off tracks scroll position
-      // continuously — not only at IntersectionObserver threshold crossings — and
-      // only while a clip is near (cheap: a getBoundingClientRect for ≤3 elements).
-      onScroll = () => {
-        if (visible.size) schedule();
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
+      // Only needed when capping (mobile): keep the two nearest updated as you
+      // scroll, not just at IntersectionObserver crossings. Cheap: ≤3 rects/frame.
+      if (Number.isFinite(maxPlaying)) {
+        onScroll = () => {
+          if (visible.size > maxPlaying) schedule();
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+      }
     }
 
     // ---- magnetic buttons (desktop, fine pointer) ----

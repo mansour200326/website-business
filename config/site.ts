@@ -139,7 +139,7 @@ export const site = {
 
   /** FOOTER */
   footer: {
-    legal: "Websmith is a Web Smith FZCO company · websmith.ae",
+    legal: "Websmith is a Web Smith FZCO company",
   },
 };
 
