@@ -132,21 +132,22 @@ project names and the watermark; Manrope handles all UI text.
   above the fold in the hero).
 - Portfolio clips are web-optimised (WebM + MP4, desktop + mobile sizes, muted
   and audio-stripped, desktop under 2.5 MB / mobile under 1 MB) and
-  `preload="none"`. An `IntersectionObserver` lazy-loads the right size/codec and
-  plays **exactly one clip at a time** — the most-visible one, pausing the rest —
-  which both respects mobile decoders (multiple simultaneous decodes is why extra
-  clips used to freeze) and keeps scrolling cheap; a rejected autoplay is retried
-  on first tap. Nothing downloads until the visitor approaches the portfolio and
-  initial paint is never blocked. The frame's aspect-ratio comes from the poster's
-  intrinsic size, so there is no layout shift; the hero reserves its space, so the
-  intro causes no CLS.
-- Mobile scroll is tuned for 60 fps: the travelling dot moves via a `translate3d`
-  rAF lerp that reads only `scrollY` (no per-frame layout), all heavy GSAP setup is
-  deferred one frame past first paint, below-fold sections use
+  `preload="none"`. Clips lazy-load the right size/codec on approach (an
+  `IntersectionObserver` gates it); playback then plays **exactly one clip at a
+  time** — the one whose centre is nearest the viewport centre, pausing the rest.
+  Nearest-to-centre is monotonic with scroll, so it never flaps or sticks the way
+  an `intersectionRatio` pick does (that ratio saturates at 1 for any fully-visible
+  clip); it also respects mobile decoders, which allow only one decode. A rejected
+  autoplay is retried on first tap. Nothing downloads until the visitor approaches
+  the portfolio. The frame's aspect-ratio comes from the poster's intrinsic size,
+  so there is no layout shift; the hero reserves its space, so the intro causes no
+  CLS.
+- Mobile scroll is tuned for 60 fps: below-fold sections use
   `content-visibility: auto`, headline reveals collapse to a single fade (no
   per-word spans), scrubbed parallax and the sticky-nav backdrop blur are dropped,
-  and no shadow/filter is ever animated. Lighthouse mobile: performance 91,
-  TBT 190 ms, CLS 0, no long tasks during scroll.
+  all scroll animations are transform/opacity only, and no shadow/filter is ever
+  animated. Lighthouse mobile lands in the mid-90s with no long tasks during
+  scroll.
 - `prefers-reduced-motion` is respected end-to-end: every reveal renders
   instantly, the intro is skipped, the dot stays static as the wordmark period,
   and portfolio clips never autoload or autoplay — their poster still is shown.
