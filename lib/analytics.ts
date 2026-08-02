@@ -18,9 +18,24 @@ export function supabaseConfigured(): boolean {
   return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
+/**
+ * Normalize SUPABASE_URL to the bare project origin. Tolerates the values
+ * people actually paste from the Supabase dashboard: trailing slashes, the
+ * REST endpoint ("…/rest/v1/"), or any other path suffix — only the origin
+ * matters, we always append /rest/v1 ourselves.
+ */
+export function supabaseBase(): string {
+  const raw = (process.env.SUPABASE_URL || "").trim();
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return raw.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+  }
+}
+
 /** Minimal PostgREST call — no client library needed. Returns the Response. */
 export async function sb(path: string, init?: RequestInit): Promise<Response> {
-  const url = `${process.env.SUPABASE_URL!.replace(/\/$/, "")}/rest/v1/${path}`;
+  const url = `${supabaseBase()}/rest/v1/${path}`;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return fetch(url, {
     ...init,
