@@ -7,17 +7,24 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * (httpOnly cookie); reads aggregates from /api/stats; auto-refreshes every
  * 60 s. Visiting this page also sets the ws_exclude cookie so the admin's own
  * browser is never counted in the stats.
+ *
+ * The full layout ALWAYS renders — zeroed KPIs, empty chart, section headings —
+ * even before data arrives or when Supabase isn't reachable; failures surface
+ * as a visible error banner, never as a blank page.
  */
 
 interface Stats {
   configured: boolean;
+  error?: string;
   kpis?: { pageviews: number; visitors: number; whatsapp: number; tel: number; portfolio: number; conversion: number };
   series?: Array<{ day: string; views: number; visitors: number }>;
   pages?: Array<{ key: string; count: number }>;
   referrers?: Array<{ key: string; count: number }>;
   countries?: Array<{ key: string; count: number }>;
   devices?: Array<{ key: string; count: number }>;
-  leads?: { total: number | null; week: number | null; latest: Array<{ business: string; buildType: string; date: string }> };
+  sources?: Array<{ key: string; visitors: number; whatsapp: number }>;
+  lastEvent?: { at: string; type: string } | null;
+  leads?: { total: number | null; week: number | null; latest: Array<{ business: string; buildType: string; date: string }>; error?: string };
 }
 
 type Range = "today" | "7d" | "30d";
@@ -26,6 +33,29 @@ const RANGE_LABELS: Array<[Range, string]> = [
   ["7d", "7 days"],
   ["30d", "30 days"],
 ];
+const RANGE_DAYS: Record<Range, number> = { today: 1, "7d": 7, "30d": 30 };
+
+const ZERO_KPIS = { pageviews: 0, visitors: 0, whatsapp: 0, tel: 0, portfolio: 0, conversion: 0 };
+const ZERO_SOURCES = ["Instagram", "Google", "Direct", "Other"].map((key) => ({ key, visitors: 0, whatsapp: 0 }));
+
+/** Zero-filled placeholder series so the chart renders before/without data. */
+function zeroSeries(range: Range): Array<{ day: string; views: number; visitors: number }> {
+  const days = RANGE_DAYS[range];
+  const out = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() + 4 * 3600_000 - i * 86400_000); // Dubai-local day keys
+    out.push({ day: d.toISOString().slice(0, 10), views: 0, visitors: 0 });
+  }
+  return out;
+}
+
+function timeAgo(iso: string): string {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+  return `${Math.floor(s / 86400)} d ago`;
+}
 
 const INK = "#141416";
 const CYAN_DEEP = "#0097A7"; // visitors series — passes 3:1 on ivory (validated)
@@ -161,6 +191,7 @@ export default function Dashboard() {
   const [loginError, setLoginError] = useState("");
   const [range, setRange] = useState<Range>("7d");
   const [stats, setStats] = useState<Stats | null>(null);
+  const [fetchError, setFetchError] = useState("");
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const rangeRef = useRef<Range>(range);
   rangeRef.current = range;
@@ -177,12 +208,18 @@ export default function Dashboard() {
         setAuthed(false);
         return;
       }
+      if (!res.ok) {
+        setAuthed(true);
+        setFetchError(`/api/stats failed with HTTP ${res.status}`);
+        return;
+      }
       const data = (await res.json()) as Stats;
       setAuthed(true);
       setStats(data);
+      setFetchError("");
       setUpdatedAt(new Date());
-    } catch {
-      /* keep last good data */
+    } catch (e) {
+      setFetchError(`Couldn't load stats — ${(e as Error).message || "network error"}`);
     }
   }, []);
 
@@ -240,7 +277,13 @@ export default function Dashboard() {
     );
   }
 
-  const k = stats?.kpis;
+  // Everything below ALWAYS renders — real data when present, zeros otherwise.
+  const k = stats?.kpis ?? ZERO_KPIS;
+  const series = stats?.series?.length ? stats.series : zeroSeries(range);
+  const sources = stats?.sources?.length ? stats.sources : ZERO_SOURCES;
+  const banner = fetchError || stats?.error || "";
+  const loading = !stats && !fetchError && authed === null;
+  const maxSource = Math.max(1, ...sources.map((s) => Math.max(s.visitors, s.whatsapp)));
   const fmtDate = (iso: string) =>
     /^\d{4}-/.test(iso) ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : iso;
 
@@ -262,84 +305,112 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {stats && !stats.configured && (
-        <div className="dash-card dash-notice">
-          Supabase isn&apos;t configured yet — set <code>SUPABASE_URL</code> and{" "}
-          <code>SUPABASE_SERVICE_ROLE_KEY</code>, and run <code>supabase/schema.sql</code>.
+      {banner && (
+        <div className="dash-card dash-error" role="alert">
+          <strong>Analytics problem:</strong> {banner}
         </div>
       )}
+      {loading && <div className="dash-card dash-notice">Loading…</div>}
 
-      {k && (
-        <section className="dash-kpis">
-          {[
-            ["Page views", String(k.pageviews)],
-            ["Unique visitors", String(k.visitors)],
-            ["WhatsApp taps", String(k.whatsapp)],
-            ["Phone taps", String(k.tel)],
-            ["Conversion", `${(k.conversion * 100).toFixed(1)}%`],
-          ].map(([label, value]) => (
-            <div className="dash-card dash-kpi" key={label}>
-              <div className="dash-card-label">{label}</div>
-              <div className="dash-kpi-value">{value}</div>
-            </div>
-          ))}
-        </section>
-      )}
+      <section className="dash-kpis">
+        <div className="dash-card dash-kpi big">
+          <div className="dash-card-label">Page views</div>
+          <div className="dash-kpi-value">{k.pageviews}</div>
+        </div>
+        <div className="dash-card dash-kpi big">
+          <div className="dash-card-label">WhatsApp taps</div>
+          <div className="dash-kpi-value">{k.whatsapp}</div>
+        </div>
+        <div className="dash-card dash-kpi">
+          <div className="dash-card-label">Unique visitors</div>
+          <div className="dash-kpi-value">{k.visitors}</div>
+        </div>
+        <div className="dash-card dash-kpi">
+          <div className="dash-card-label">Phone taps</div>
+          <div className="dash-kpi-value">{k.tel}</div>
+        </div>
+        <div className="dash-card dash-kpi">
+          <div className="dash-card-label">Conversion</div>
+          <div className="dash-kpi-value">{(k.conversion * 100).toFixed(1)}%</div>
+        </div>
+      </section>
 
-      {stats?.series && stats.series.length > 0 && (
-        <section className="dash-card">
-          <div className="dash-card-label">Views &amp; visitors per day</div>
-          <LineChart series={stats.series} />
-        </section>
-      )}
+      <section className="dash-card">
+        <div className="dash-card-label">Views &amp; visitors per day</div>
+        <LineChart series={series} />
+      </section>
 
-      {stats?.configured && (
-        <section className="dash-grid">
-          <Bars title="Top pages" rows={stats.pages || []} total={k?.pageviews || 0} />
-          <Bars title="Top referrers" rows={stats.referrers || []} total={k?.pageviews || 0} />
-          <Bars title="Countries" rows={stats.countries || []} total={k?.pageviews || 0} />
-          <Bars title="Devices" rows={stats.devices || []} total={k?.pageviews || 0} />
-        </section>
-      )}
-
-      {stats?.leads && (
-        <section className="dash-card">
-          <div className="dash-card-label">Leads</div>
-          <div className="dash-leads-kpis">
-            <span>
-              <strong>{stats.leads.total ?? "—"}</strong> briefs total
+      <section className="dash-card">
+        <div className="dash-card-label">Sources — visitors &amp; WhatsApp taps</div>
+        <div className="dash-sources-head">
+          <span />
+          <span>Visitors</span>
+          <span>WhatsApp</span>
+        </div>
+        {sources.map((s) => (
+          <div className="dash-source-row" key={s.key}>
+            <span className="dash-row-key">{s.key}</span>
+            <span className="dash-source-cell">
+              <i className="v" style={{ width: `${(s.visitors / maxSource) * 100}%` }} />
+              <em>{s.visitors}</em>
             </span>
-            <span>
-              <strong>{stats.leads.week ?? "—"}</strong> this week
+            <span className="dash-source-cell">
+              <i className="w" style={{ width: `${(s.whatsapp / maxSource) * 100}%` }} />
+              <em>{s.whatsapp}</em>
             </span>
           </div>
-          {stats.leads.latest.length > 0 ? (
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th>Business</th>
-                  <th>Build</th>
-                  <th>Date</th>
+        ))}
+      </section>
+
+      <section className="dash-grid">
+        <Bars title="Top pages" rows={stats?.pages || []} total={k.pageviews} />
+        <Bars title="Top referrers" rows={stats?.referrers || []} total={k.pageviews} />
+        <Bars title="Countries" rows={stats?.countries || []} total={k.pageviews} />
+        <Bars title="Devices" rows={stats?.devices || []} total={k.pageviews} />
+      </section>
+
+      <section className="dash-card">
+        <div className="dash-card-label">Leads</div>
+        {stats?.leads?.error && <p className="dash-empty">{stats.leads.error}</p>}
+        <div className="dash-leads-kpis">
+          <span>
+            <strong>{stats?.leads?.total ?? "—"}</strong> briefs total
+          </span>
+          <span>
+            <strong>{stats?.leads?.week ?? "—"}</strong> this week
+          </span>
+        </div>
+        {stats?.leads?.latest?.length ? (
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>Build</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.leads.latest.map((l, i) => (
+                <tr key={i}>
+                  <td>{l.business}</td>
+                  <td>{l.buildType}</td>
+                  <td>{fmtDate(l.date)}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {stats.leads.latest.map((l, i) => (
-                  <tr key={i}>
-                    <td>{l.business}</td>
-                    <td>{l.buildType}</td>
-                    <td>{fmtDate(l.date)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="dash-empty">No briefs yet</p>
-          )}
-        </section>
-      )}
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="dash-empty">No briefs yet</p>
+        )}
+      </section>
 
       <div className="dash-foot">
-        {updatedAt && <span>Updated {updatedAt.toLocaleTimeString()}</span>}
+        <span>
+          {stats?.lastEvent
+            ? `Last event: ${stats.lastEvent.type} · ${timeAgo(stats.lastEvent.at)}`
+            : "Last event: none recorded yet"}
+          {updatedAt && ` · updated ${updatedAt.toLocaleTimeString()}`}
+        </span>
         <span>Auto-refreshes every 60s · your browser is excluded from tracking</span>
       </div>
     </main>
