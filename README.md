@@ -168,13 +168,22 @@ third-party scripts, no raw IPs stored.
   (`salt | ip | user-agent | date`) instead of any IP. `/dashboard` is never
   tracked, and visiting it sets a `ws_exclude` cookie so the admin's own browser
   is excluded everywhere (checked client- and server-side).
+- **Tracked short links** — `/wa` logs a `whatsapp_click` (referrer preserved,
+  `?src=instagram` supported for in-app browsers that strip the Referer) and
+  302-redirects straight to the WhatsApp chat; `/call` does the same for
+  `tel:+971585461253` as a `tel_click`. Put `websmith.ae/wa?src=instagram` in
+  the Instagram bio and taps become attributable in the Sources card.
 - **Dashboard** — `/dashboard`, password-protected (httpOnly cookie session via
   `ADMIN_PASSWORD`), `noindex`, mobile-friendly, brand-styled. Today / 7 days /
-  30 days switcher; KPI cards (views, unique visitors, WhatsApp taps, phone
-  taps, conversion = WhatsApp ÷ visitors); a daily views+visitors line chart;
-  top pages / referrers / countries / device split; a Leads section reading the
-  agent project's `leads` table (total, this week, latest 10); auto-refresh
-  every 60 s.
+  30 days switcher; KPI cards with page views and WhatsApp taps as the two hero
+  cards (plus unique visitors, phone taps, conversion = WhatsApp ÷ visitors); a
+  daily views+visitors line chart; a Sources card splitting visitors and
+  WhatsApp taps by Instagram / Google / Direct / Other; top pages / referrers /
+  countries / device split; a Leads section reading the agent project's `leads`
+  table (total, this week, latest 10); a "last event" heartbeat; auto-refresh
+  every 60 s. The full layout always renders (zeros when empty), and any
+  failure — missing env vars, missing `site_events` table, unreachable
+  Supabase — surfaces as a visible error banner naming the cause.
 - **Setup** — run `supabase/schema.sql` in the Supabase SQL editor, then set
   the env vars (locally in `.env.local`, and in Vercel):
 

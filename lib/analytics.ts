@@ -64,6 +64,43 @@ export function safeEqual(a: string, b: string): boolean {
   return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
+/**
+ * Log an event straight from a server route (used by the /wa and /call
+ * redirects). Same privacy rules as /api/track: country from Vercel's geo
+ * header, device from the UA, daily salted hash — no raw IP stored. Honors the
+ * admin's ws_exclude cookie. Never throws.
+ */
+export async function logServerEvent(req: Request, type: EventType, path: string): Promise<void> {
+  try {
+    const cookie = req.headers.get("cookie") || "";
+    if (cookie.includes("ws_exclude=1")) return;
+    if (!supabaseConfigured()) return;
+    const ua = req.headers.get("user-agent") || "";
+    const ip =
+      (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
+      req.headers.get("x-real-ip") ||
+      "";
+    // Referer header when the browser sends one; else an explicit ?src= tag
+    // (e.g. /wa?src=instagram in the Instagram bio) so the source is never lost.
+    const src = new URL(req.url).searchParams.get("src");
+    const referrer = req.headers.get("referer") || (src ? `src:${src}` : "");
+    await sb("site_events", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        type,
+        path,
+        referrer: referrer.slice(0, 300) || null,
+        country: req.headers.get("x-vercel-ip-country") || null,
+        device: /Mobi|Android|iPhone|iPad|IEMobile/i.test(ua) ? "mobile" : "desktop",
+        visitor_hash: visitorHash(ip, ua),
+      }),
+    });
+  } catch {
+    // logging must never break the redirect
+  }
+}
+
 /** Is this request an authenticated admin? (checks the httpOnly session cookie) */
 export function isAdmin(req: Request): boolean {
   if (!process.env.ADMIN_PASSWORD) return false;

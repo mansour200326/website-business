@@ -37,9 +37,12 @@ export default function Analytics() {
       const a = (e.target as Element | null)?.closest?.("a");
       if (!a) return;
       const href = a.getAttribute("href") || "";
-      if (href.startsWith("tel:")) send("tel_click", pathname);
-      else if (href.includes("wa.me/")) send("whatsapp_click", pathname);
-      else if (a.classList.contains("pf-live")) send("portfolio_click", href);
+      // Clicks carry the landing referrer too, so taps stay attributable to
+      // their source (Instagram, Google, …) in the dashboard's Sources card.
+      const ref = document.referrer;
+      if (href.startsWith("tel:")) send("tel_click", pathname, ref);
+      else if (href.includes("wa.me/")) send("whatsapp_click", pathname, ref);
+      else if (a.classList.contains("pf-live")) send("portfolio_click", href, ref);
     };
     document.addEventListener("click", onClick, { capture: true, passive: true });
     return () => document.removeEventListener("click", onClick, { capture: true });
