@@ -155,6 +155,36 @@ project names and the watermark; Manrope handles all UI text.
   positions are tested at 390px. `/privacy` and secondary pages are normal
   vertical pages.
 
+## Analytics & the admin dashboard
+
+First-party, privacy-friendly analytics — no cookies for visitors, no
+third-party scripts, no raw IPs stored.
+
+- **Tracking** — `components/Analytics.tsx` sends a `navigator.sendBeacon`
+  (fire-and-forget, zero paint impact) to `/api/track` on every page load, plus
+  click events for WhatsApp (`wa.me`) links, `tel:` links, and portfolio
+  "Visit live site" links. The server derives country from Vercel's geo header
+  and device from the user agent, and stores a **daily-rotating salted SHA-256**
+  (`salt | ip | user-agent | date`) instead of any IP. `/dashboard` is never
+  tracked, and visiting it sets a `ws_exclude` cookie so the admin's own browser
+  is excluded everywhere (checked client- and server-side).
+- **Dashboard** — `/dashboard`, password-protected (httpOnly cookie session via
+  `ADMIN_PASSWORD`), `noindex`, mobile-friendly, brand-styled. Today / 7 days /
+  30 days switcher; KPI cards (views, unique visitors, WhatsApp taps, phone
+  taps, conversion = WhatsApp ÷ visitors); a daily views+visitors line chart;
+  top pages / referrers / countries / device split; a Leads section reading the
+  agent project's `leads` table (total, this week, latest 10); auto-refresh
+  every 60 s.
+- **Setup** — run `supabase/schema.sql` in the Supabase SQL editor, then set
+  the env vars (locally in `.env.local`, and in Vercel):
+
+| Variable | Value |
+| --- | --- |
+| `SUPABASE_URL` | the Supabase project URL (same as the agent project) |
+| `SUPABASE_SERVICE_ROLE_KEY` | the service-role key (server-only; RLS is enabled with no policies, so only this key can touch `site_events`) |
+| `ADMIN_PASSWORD` | password for `/dashboard` |
+| `ANALYTICS_SALT` | *(optional)* dedicated salt for the visitor hash — falls back to `ADMIN_PASSWORD` |
+
 ## Regenerating the OG image & icons
 
 `public/og.png` is a committed static asset: the "Websmith." wordmark centered

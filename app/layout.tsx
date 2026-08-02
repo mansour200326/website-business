@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { manrope, instrumentSerif } from "./fonts";
 import { site } from "@/config/site";
+import Analytics from "@/components/Analytics";
 import "./globals.css";
 
 const title = site.studioName || site.meta.title;
@@ -66,6 +67,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        <Analytics />
       </body>
     </html>
   );
