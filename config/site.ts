@@ -72,7 +72,7 @@ export const site = {
     cta: "Start on WhatsApp",
   },
 
-  /** PORTFOLIO — exactly three projects, each a full-viewport moment */
+  /** PORTFOLIO — four projects, each a full-viewport moment */
   portfolio: [
     {
       slug: "sumou-jet",
@@ -94,6 +94,13 @@ export const site = {
       blurb: "Dubai's first luxury indoor padel club — brand, booking, and a bilingual members' world.",
       liveUrl: "https://maisonpadel.ae",
       tint: "#ECF1EE",
+    },
+    {
+      slug: "big-night",
+      name: "Big Night",
+      blurb: "Game night, made into a brand — a playful new home for play at bignight.games.",
+      liveUrl: "https://bignight.games",
+      tint: "#F0EDF4",
     },
   ] as Project[],
 

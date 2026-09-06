@@ -1,13 +1,13 @@
 # Portfolio media
 
-Exactly three projects. Each portfolio moment plays a short **screen recording**
-of the real site (its opening animation + a scroll) inside a browser frame. The
-clip is lazy-loaded and plays only while the section is on screen; a poster still
-shows until it plays and stays as the fallback.
+Four projects. Each portfolio moment plays a short **screen recording** of the
+real site (its opening animation + a scroll) inside a browser frame. The clip is
+lazy-loaded and plays only while the section is on screen; a poster still shows
+until it plays and stays as the fallback.
 
 ## Files per project (`/public/portfolio/`)
 
-For each `slug` (`sumou-jet`, `grailhaus`, `maison-padel`):
+For each `slug` (`sumou-jet`, `grailhaus`, `maison-padel`, `big-night`):
 
 | File                      | What it is                                            |
 | ------------------------- | ----------------------------------------------------- |
@@ -37,6 +37,19 @@ ffmpeg -i in.mov -an -c:v libx264 -profile:v high -pix_fmt yuv420p \
 ffmpeg -ss 8 -i in.mov -frames:v 1 -vf "scale=1400:-2" -c:v libwebp -quality 82 \
   sumou-jet-poster.webp
 ```
+
+## Big Night — media still needed
+
+`big-night` (bignight.games) has no media yet, so its frame shows the clean
+tinted panel. To bring it to parity with the other three, drop in a screen
+recording of the live site (opening animation + a short scroll, ~1600px wide,
+15–30 s, like the other captures) and process it into these exact files:
+
+- `big-night-poster.webp`
+- `big-night-desktop.webm` / `big-night-desktop.mp4`
+- `big-night-mobile.webm` / `big-night-mobile.mp4`
+
+A poster alone is enough for a static still; the recipe above produces the rest.
 
 ## Notes
 

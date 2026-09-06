@@ -106,7 +106,7 @@ All scroll choreography is GSAP + ScrollTrigger, set up in `components/Home.tsx`
   scroll; body text fades up; a huge Instrument Serif *Websmith* watermark drifts
   behind alternating sections at 4% opacity (the drift is desktop-only — on
   mobile it stays static for performance).
-- **Portfolio** — exactly three projects (Sumou Jet, Grailhaus, Maison Padel),
+- **Portfolio** — four projects (Sumou Jet, Grailhaus, Maison Padel, Big Night),
   each a full-viewport moment with tight spacing so the next peeks as one ends.
   A browser-framed **screen recording** of the real site (its opening animation +
   a short scroll) plays inside the frame, and the background tints toward the
