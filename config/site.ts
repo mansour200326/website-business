@@ -98,9 +98,9 @@ export const site = {
     {
       slug: "big-night",
       name: "Big Night",
-      blurb: "Game night, made into a brand — a playful new home for play at bignight.games.",
+      blurb: "Party games for the room — the TV is the stage, phones are the controllers. No downloads, no accounts.",
       liveUrl: "https://bignight.games",
-      tint: "#F0EDF4",
+      tint: "#F4EDEE",
     },
   ] as Project[],
 
