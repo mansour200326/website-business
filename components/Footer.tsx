@@ -1,5 +1,4 @@
 import { site } from "@/config/site";
-import { waLink } from "@/lib/whatsapp";
 import Logo from "./Logo";
 
 export default function Footer() {
@@ -9,6 +8,7 @@ export default function Footer() {
         <div className="f-mark">
           <Logo variant="inline" tone="ivory" />
         </div>
+        <p className="f-company">{site.company}</p>
         <div className="f-in">
           <span className="f-legal">
             {site.footer.legal}
@@ -16,14 +16,15 @@ export default function Footer() {
             {site.footer.copyright}
           </span>
           <div className="f-right">
-            <a className="f-link sweep" href={waLink()} target="_blank" rel="noopener noreferrer">
-              WhatsApp
+            {/* /wa and /call are the tracked redirects (app/wa, app/call) */}
+            <a className="f-link sweep" href="/wa">
+              WhatsApp {site.whatsappNumber}
             </a>
-            <a className="f-link sweep" href="tel:+971585461253">
-              +971 58 546 1253
+            <a className="f-link sweep" href="/call">
+              Call {site.whatsappNumber}
             </a>
-            <a className="f-link sweep" href="https://websmith.ae" target="_blank" rel="noopener noreferrer">
-              websmith.ae
+            <a className="f-link sweep" href={`mailto:${site.email}`}>
+              {site.email}
             </a>
             <a className="f-link sweep" href="/privacy">
               Privacy
@@ -33,6 +34,9 @@ export default function Footer() {
             </a>
           </div>
         </div>
+        <p className="f-terms">
+          {site.offer.short}. {site.footer.terms} <a href="/terms#launch-offer">Read the terms</a>.
+        </p>
       </div>
     </footer>
   );

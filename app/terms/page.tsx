@@ -29,6 +29,30 @@ export default function Terms() {
               proposal we send you; where a proposal and these terms differ, the proposal wins.
             </p>
 
+            {/*
+              DRAFT — for Wakeel (General Counsel) to review before this goes live.
+              Terms of the AED 1,850 Launch offer as stated by Mans on 2026-10-27:
+              50% or 100% payment by Stripe link, 2 change rounds included, refund
+              if we don't deliver the agreed site. "Up to 5 pages" and "hosting and
+              domain not included unless stated" come from ~/projects/leads/config.md.
+            */}
+            <h2 id="launch-offer">The Launch offer (AED 1,850)</h2>
+            <p>
+              Before you pay anything, we design a free concept of your new website from your
+              current site and public content. If you don&apos;t want to go ahead, you owe nothing.
+            </p>
+            <p>
+              If you do, the Launch website is AED 1,850, one-off: up to 5 pages, built from the
+              concept you approved. Hosting and domain are not included unless the proposal says so.
+              You pay by Stripe payment link, either 50% to start and 50% before the site goes live,
+              or 100% up front.
+            </p>
+            <p>
+              Your site goes live within 2 working days of your approval and payment, as long as we
+              have your content and access to your domain. Two rounds of changes are included. If we
+              don&apos;t deliver the site we agreed, we refund what you paid.
+            </p>
+
             <h2>The services</h2>
             <p>
               We design and build websites. What we&apos;re building for you is described in the

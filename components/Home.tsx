@@ -39,7 +39,6 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
     const onPageShow = (e: PageTransitionEvent) => {
       if (!e.persisted) return; // only a bfcache restore (back/forward navigation)
       window.scrollTo(0, 0);
-      if (!reduce) window.location.reload(); // reload so the intro replays from the top
     };
     window.addEventListener("pageshow", onPageShow);
 
@@ -201,20 +200,34 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
         ScrollTrigger.refresh();
       };
 
-      // ---- intro: the dot writes the wordmark — EVERY page load ----
+      // ---- intro: the dot writes the wordmark — once per session, ≤0.8s ----
+      // The headline, offer, CTA and work strip are visible from the first paint;
+      // only the wordmark letters animate, on top. Any tap/scroll/key skips it.
       const letters = gsap.utils.toArray<HTMLElement>(".hm-l");
       const mark = document.querySelector<HTMLElement>(".hero-mark")!;
-      // The homepage arrives AFTER the wordmark is written: hide the hero body and
-      // nav up front (pre-paint, so no flash) — but keep their layout space, so
-      // nothing shifts when they fade in. Below-fold content stays in normal flow
-      // and reveals on scroll via its own triggers.
-      const heroBody = gsap.utils.toArray<HTMLElement>(".hero-tagline, .hero-support, .hero-cta");
-      const navEl = document.querySelector<HTMLElement>("nav");
-      gsap.set(heroBody, { y: 22, opacity: 0 });
-      if (navEl) gsap.set(navEl, { opacity: 0 });
-      const mr = mark.getBoundingClientRect();
       const s = dotSize();
       const end = posOf(heroSlot);
+      let seen = false;
+      try {
+        seen = sessionStorage.getItem("ws-intro") === "1";
+        sessionStorage.setItem("ws-intro", "1");
+      } catch {
+        /* storage blocked: just play it */
+      }
+      if (seen) {
+        cx = end.x;
+        cy = end.y;
+        applyDot();
+        attachDotScroll();
+        const refreshSeen = () => ScrollTrigger.refresh();
+        window.addEventListener("resize", refreshSeen, { passive: true });
+        window.addEventListener("load", refreshSeen, { once: true });
+        return () => {
+          cancelAnimationFrame(rafId);
+          window.removeEventListener("resize", refreshSeen);
+        };
+      }
+      const mr = mark.getBoundingClientRect();
       gsap.set(letters, { yPercent: 125, opacity: 0 });
       cx = mr.left - 30;
       cy = mr.top + mr.height * 0.52 - s / 2;
@@ -228,22 +241,15 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
         cy = proxy.y;
         applyDot();
       };
-      // One continuous choreography: empty ivory → the dot writes the wordmark and
-      // settles as the period → a ~0.4s hold → the hero body fade-rises and the nav
-      // fades in → the living homepage. No hard cut.
+      // The dot writes the wordmark and settles as the period: ~0.75s total.
       const tl = gsap.timeline({ onUpdate: sync, onComplete: finish });
-      tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.11, ease: "back.out(1.6)", force3D: true }, 0.1);
-      tl.to(proxy, { x: end.x, y: end.y, duration: 1.45, ease: "power2.inOut" }, 0);
-      tl.to(proxy, { x: end.x + s * 0.7, duration: 0.12, ease: "power2.out" }, 1.45);
-      tl.to(proxy, { x: end.x, duration: 0.32, ease: "elastic.out(1,0.5)" }, ">");
-      // hold, then bring the homepage in
-      tl.to(heroBody, { y: 0, opacity: 1, duration: 0.5, stagger: 0.09, ease: "power2.out", force3D: true }, "+=0.4");
-      if (navEl) tl.to(navEl, { opacity: 1, duration: 0.55, ease: "power1.out" }, "<0.05");
+      tl.to(letters, { yPercent: 0, opacity: 1, duration: 0.36, stagger: 0.035, ease: "back.out(1.6)", force3D: true }, 0.02);
+      tl.to(proxy, { x: end.x, y: end.y, duration: 0.55, ease: "power2.inOut" }, 0);
+      tl.to(proxy, { x: end.x + s * 0.5, duration: 0.06, ease: "power2.out" }, 0.55);
+      tl.to(proxy, { x: end.x, duration: 0.14, ease: "power2.out" }, ">");
 
       const revealAll = () => {
         gsap.set(letters, { yPercent: 0, opacity: 1 });
-        gsap.set(heroBody, { y: 0, opacity: 1 });
-        if (navEl) gsap.set(navEl, { opacity: 1 });
       };
       const skip = () => {
         if (tl.progress() < 1) {
@@ -405,7 +411,7 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
     };
   }, []);
 
-  const { hero, portfolio, packages, about, process, close } = site;
+  const { hero, portfolio, concepts, packages, about, process, close, offer } = site;
 
   return (
     <div ref={rootRef}>
@@ -431,6 +437,7 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
           </h1>
           <p className="hero-tagline">{hero.tagline}</p>
           <p className="hero-support">{hero.support}</p>
+          <p className="hero-offer">{offer.line}</p>
           <div className="hero-cta">
             <a className="btn" data-magnetic href={waLink()} target="_blank" rel="noopener noreferrer">
               {hero.cta}
@@ -438,6 +445,27 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
             <a className="tlink sweep" href="#work">
               See the work
             </a>
+          </div>
+          {/* The work, in the first screen: real stills of the three client sites. */}
+          <div className="hero-strip" aria-label="Selected work">
+            {portfolio.map((p) => {
+              const m = media[p.slug];
+              return (
+                <a className="hs-item" href={`#work-${p.slug}`} key={p.slug}>
+                  <span className="hs-frame">
+                    {m?.has ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.poster} alt={`${p.name} website`} width={m.width} height={m.height} />
+                    ) : (
+                      <span style={{ background: p.tint, display: "block", width: "100%", height: "100%" }} />
+                    )}
+                  </span>
+                  <span className="hs-cap">
+                    {p.name} <em>{p.kind ?? "Client"}</em>
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </section>
 
@@ -447,18 +475,20 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
             const m = media[p.slug];
             const ratio = m?.has ? `${m.width} / ${m.height}` : "1400 / 670";
             return (
-              <section className="pf" data-tint={p.tint} key={p.slug}>
+              <section className="pf" id={`work-${p.slug}`} data-tint={p.tint} key={p.slug}>
                 <div className="wrap pf-grid">
                   <div className="pf-info">
                     <div className="pf-index">
                       <span className="dot-anchor" data-dot-anchor={p.slug} />
-                      {`0${i + 1} — Selected work`}
+                      {`0${i + 1} — ${p.kind ?? "Selected work"}`}
                     </div>
                     <h2 className="pf-name">{p.name}</h2>
                     <p className="pf-blurb reveal-fade">{p.blurb}</p>
-                    <a className="pf-live sweep" href={p.liveUrl} target="_blank" rel="noopener noreferrer">
-                      Visit live site <span className="arw">→</span>
-                    </a>
+                    {p.liveUrl ? (
+                      <a className="pf-live sweep" href={p.liveUrl} target="_blank" rel="noopener noreferrer">
+                        Visit live site <span className="arw">→</span>
+                      </a>
+                    ) : null}
                   </div>
                   <div className="pf-frame">
                     <div className="pf-bar" aria-hidden="true">
@@ -499,23 +529,52 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
           })}
         </div>
 
-        {/* PACKAGES */}
-        <section className="section wrap" id="packages" data-section>
-          <div className="watermark" aria-hidden="true">
-            Websmith
-          </div>
+        {/* CONCEPTS — free concepts for UAE businesses; NOT clients */}
+        <section className="section wrap" id="concepts" data-section>
           <div className="sec-head">
-            <span className="label">Packages</span>
-            <span className="dot-anchor" data-dot-anchor="packages" />
+            <span className="label">Free concepts</span>
+            <span className="dot-anchor" data-dot-anchor="concepts" />
             <span className="idx">02</span>
           </div>
           <h2 className="sec-title">
-            <Kinetic text="Pick a starting point. No prices, no packages padded with filler." />
+            <Kinetic text="This is what your free concept looks like." />
+          </h2>
+          <p className="concepts-note reveal-fade">
+            Concepts we designed for UAE businesses from their own websites, to show each owner what
+            their site could be. These are concepts, not client work.
+          </p>
+          <div className="concept-grid">
+            {concepts.map((c) => (
+              <a className="concept reveal-fade" href={c.url} target="_blank" rel="noopener noreferrer" key={c.id}>
+                <span className="concept-frame">
+                  <span className="concept-tag">Concept · not a client</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/concepts/${c.id}.webp`} alt={`Websmith concept for a ${c.title.toLowerCase()} in ${c.place}`} width={1200} height={750} loading="lazy" />
+                </span>
+                <span className="concept-title">{c.title}</span>
+                <span className="concept-place">
+                  {c.place} · <span className="sweep">Open the concept →</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* PACKAGES */}
+        <section className="section wrap" id="packages" data-section>
+          <div className="sec-head">
+            <span className="label">Packages</span>
+            <span className="dot-anchor" data-dot-anchor="packages" />
+            <span className="idx">03</span>
+          </div>
+          <h2 className="sec-title">
+            <Kinetic text="Pick a starting point. Every one starts with a free concept." />
           </h2>
           <div className="pkg-grid">
             {packages.map((pk) => (
               <div className="pkg reveal-fade" key={pk.name}>
                 <div className="pk-name serif">{pk.name}</div>
+                <div className="pk-price">{pk.price}</div>
                 <p>{pk.description}</p>
                 <a className="tlink sweep" href={waLink(pk.subject)} target="_blank" rel="noopener noreferrer">
                   Get a quote →
@@ -527,13 +586,10 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
 
         {/* ABOUT / PROCESS */}
         <section className="section wrap" id="studio" data-section>
-          <div className="watermark" aria-hidden="true">
-            Forged
-          </div>
           <div className="sec-head">
             <span className="label">The studio</span>
             <span className="dot-anchor" data-dot-anchor="studio" />
-            <span className="idx">03</span>
+            <span className="idx">04</span>
           </div>
           <h2 className="sec-title">
             <Kinetic text={about.title} />
@@ -561,6 +617,11 @@ export default function Home({ media }: { media: Record<string, PortfolioMedia> 
               <span className="slot" data-dot-anchor="close" aria-hidden="true" />
               {close.cta}
             </a>
+          </div>
+          <div className="close-contact reveal-fade">
+            <a className="sweep" href="/wa">WhatsApp {site.whatsappNumber}</a>
+            <a className="sweep" href="/call">Call {site.whatsappNumber}</a>
+            <a className="sweep" href={`mailto:${site.email}`}>{site.email}</a>
           </div>
         </section>
       </main>

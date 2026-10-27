@@ -47,3 +47,10 @@ ffmpeg -ss 8 -i in.mov -frames:v 1 -vf "scale=1400:-2" -c:v libwebp -quality 82 
   sets the source only as the visitor approaches, and plays/pauses on scroll.
 - If the video files are missing but a poster exists, the frame shows the poster
   still; if nothing exists, it falls back to a clean tinted panel.
+
+## Trimmed intros (2026-10-27)
+
+The clips now start after each site's own page loader, so a frame never opens on
+a blank or loading screen: Maison Padel trimmed 4.6s, Sumou Jet 3.2s, Grailhaus
+1.2s (`ffmpeg -ss <t>` and re-encoded at the original bitrates). The posters are
+real browser screenshots (1600×766 WebP), cropped to the clips' ratio.
